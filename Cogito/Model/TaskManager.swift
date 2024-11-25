@@ -14,12 +14,14 @@ struct Task: Identifiable, Codable {
     var description: String
     var isCompleted: Bool
     var dueDate: Date
-    var priority: TaskPriority
+    var priority: Priority
     var aiGenerated: Bool
     var categories: [String]
     var createdAt: Date
     
-    enum TaskPriority: String, Codable {
-        case low, medium, high
+    enum Priority: String, Codable, CaseIterable {
+        case low = "Low"
+        case medium = "Medium"
+        case high = "High"
     }
 }
