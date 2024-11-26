@@ -8,7 +8,6 @@
 
 import SwiftUI
 
-// TabBarItem.swift
 struct TabBarItem: Hashable {
     let iconName: String
     let title: String
