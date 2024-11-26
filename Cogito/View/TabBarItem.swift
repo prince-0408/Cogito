@@ -1,3 +1,11 @@
+//
+//  TabBarItem.swift
+//  Cogito
+//
+//  Created by Prince Yadav on 25/11/24.
+//
+
+
 import SwiftUI
 
 // TabBarItem.swift

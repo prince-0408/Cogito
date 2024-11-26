@@ -1,3 +1,11 @@
+//
+//  AIFeaturesDemoView.swift
+//  Cogito
+//
+//  Created by Prince Yadav on 25/11/24.
+//
+
+import SwiftUI
 // AIFeaturesDemoView.swift
 struct AIFeaturesDemoView: View {
     @State private var currentSuggestion = 0

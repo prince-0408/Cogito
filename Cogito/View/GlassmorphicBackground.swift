@@ -1,4 +1,10 @@
-// CustomStyles.swift
+//
+//  GlassmorphicBackground.swift
+//  Cogito
+//
+//  Created by Prince Yadav on 25/11/24.
+//
+
 import SwiftUI
 
 struct GlassmorphicBackground: ViewModifier {

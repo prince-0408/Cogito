@@ -1,4 +1,11 @@
-// AddButton.swift
+//
+//  AddButton.swift
+//  Cogito
+//
+//  Created by Prince Yadav on 25/11/24.
+//
+import SwiftUI
+
 struct AddButton: View {
     let tab: TabBarItem
     @Binding var selectedTab: Tab
@@ -13,10 +20,10 @@ struct AddButton: View {
         } label: {
             ZStack {
                 Circle()
-                    .fill(themeManager.currentTheme.primaryColor)
+//                    .fill(themeManager.currentTheme.primaryColor)
                     .frame(width: 50, height: 50)
-                    .shadow(color: themeManager.currentTheme.primaryColor.opacity(0.3),
-                           radius: 8, x: 0, y: 4)
+//                    .shadow(color: themeManager.currentTheme.primaryColor.opacity(0.3),
+//                radius;: 8, x: 0, y: 4)
                 
                 Image(systemName: tab.iconName)
                     .font(.system(size: 24, weight: .semibold))

@@ -6,29 +6,33 @@
 //
 import SwiftUI
 
-struct MainTabView: View {
-    @StateObject var viewModel = TaskViewModel()
+struct MainView: View {
+    @State private var selectedTab: Tab = .home
+    @StateObject private var taskViewModel = TaskViewModel()
     
     var body: some View {
-        TabView {
-            NavigationView {
-                SortableTaskListView(viewModel: viewModel)
-                    .navigationTitle("Tasks")
-            }
-            .tabItem {
-                Label("Tasks", systemImage: "checklist")
+        ZStack(alignment: .bottom) {
+            TabView(selection: $selectedTab) {
+                HomeView()
+                    .tag(Tab.home)
+                
+                CalendarView(viewModel: TaskViewModel())
+                    .tag(Tab.calendar)
+                
+//                AddTaskView()
+//                    .tag(Tab.add)
+                
+                StatsView()
+                    .tag(Tab.stats)
+                
+                ProfileView()
+                    .tag(Tab.profile)
             }
             
-            NavigationView {
-                DashboardView(viewModel: viewModel)
-            }
-            .tabItem {
-                Label("Dashboard", systemImage: "chart.bar.fill")
-            }
+            CustomTabBar(selectedTab: $selectedTab)
+                .padding(.horizontal)
+                .padding(.bottom, getSafeArea().bottom == 0 ? 20 : 0)
         }
+        .ignoresSafeArea(.keyboard)
     }
-}
-
-#Preview {
-    MainTabView(viewModel: TaskViewModel())
 }

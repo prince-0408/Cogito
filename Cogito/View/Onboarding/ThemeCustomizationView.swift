@@ -1,4 +1,11 @@
-// ThemeCustomizationView.swift
+//
+//  ThemeCustomizationView.swift
+//  Cogito
+//
+//  Created by Prince Yadav on 25/11/24.
+//
+import SwiftUI
+
 struct ThemeCustomizationView: View {
     @State private var selectedTheme = ThemeManager.AppTheme.default
     @State private var showingPreview = false
@@ -71,5 +78,80 @@ struct ThemeCustomizationView: View {
             }
         }
         .padding()
+    }
+}
+
+// Supporting Views
+struct FeatureRow: View {
+    let icon: String
+    let title: String
+    let description: String
+    
+    var body: some View {
+        HStack(spacing: 15) {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundColor(.blue)
+                .frame(width: 40)
+            
+            VStack(alignment: .leading) {
+                Text(title)
+                    .font(.headline)
+                Text(description)
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+            }
+        }
+    }
+}
+
+struct ThemePreviewCard: View {
+    let theme: ThemeManager.AppTheme
+    let isSelected: Bool
+    
+    var body: some View {
+        VStack {
+            Circle()
+                .fill(theme.primaryColor)
+                .frame(width: 60, height: 60)
+                .overlay(
+                    Circle()
+                        .stroke(Color.white, lineWidth: isSelected ? 3 : 0)
+                )
+            
+            Text(theme.rawValue)
+                .font(.caption)
+        }
+        .padding()
+        .background(theme.backgroundColor)
+        .cornerRadius(15)
+        .overlay(
+            RoundedRectangle(cornerRadius: 15)
+                .stroke(theme.primaryColor, lineWidth: isSelected ? 2 : 0)
+        )
+    }
+}
+
+struct SampleTaskRow: View {
+    let title: String
+    let priority: Task.Priority
+    let theme: ThemeManager.AppTheme
+    
+    var body: some View {
+        HStack {
+            Circle()
+                .stroke(theme.primaryColor, lineWidth: 2)
+                .frame(width: 24, height: 24)
+            
+            Text(title)
+                .foregroundColor(.primary)
+            
+            Spacer()
+            
+//            PriorityBadge(priority: priority)
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(10)
     }
 }

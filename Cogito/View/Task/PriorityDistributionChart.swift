@@ -9,8 +9,8 @@ import SwiftUI
 struct PriorityDistributionChart: View {
     @ObservedObject var viewModel: TaskViewModel
     
-    var priorityDistribution: [(Task.TaskPriority, Int)] {
-        let priorities = [Task.TaskPriority.low, .medium, .high]
+    var priorityDistribution: [(Task.Priority, Int)] {
+        let priorities = [Task.Priority.low, .medium, .high]
         return priorities.map { priority in
             (priority, viewModel.tasks.filter { $0.priority == priority }.count)
         }
@@ -44,7 +44,7 @@ struct PriorityDistributionChart: View {
         .cornerRadius(12)
     }
     
-    func priorityColor(_ priority: Task.TaskPriority) -> Color {
+    func priorityColor(_ priority: Task.Priority) -> Color {
         switch priority {
         case .low: return .green
         case .medium: return .orange

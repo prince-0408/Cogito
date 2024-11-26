@@ -1,4 +1,10 @@
-// ThemeManager.swift
+//
+//  ThemeManager.swift
+//  Cogito
+//
+//  Created by Prince Yadav on 25/11/24.
+//
+
 import SwiftUI
 
 class ThemeManager: ObservableObject {
@@ -7,7 +13,7 @@ class ThemeManager: ObservableObject {
     static let shared = ThemeManager()
     
     enum AppTheme: String, CaseIterable {
-        case default = "Default"
+        case `default` = "Default"
         case dark = "Dark"
         case light = "Light"
         case nature = "Nature"

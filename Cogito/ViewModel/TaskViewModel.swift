@@ -13,13 +13,17 @@ class TaskViewModel: ObservableObject {
     @Published var tasks: [Task] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var showDynamicIsland = false
+    @Published var dynamicIslandTask: Task?
+    @Published var filter = TaskFilter()
+    @Published var selectedTask: Task?
     
     private let openAIKey = "YOUR_OPENAI_KEY"
     
     func generateTask(from prompt: String) async {
         isLoading = true
         
-        let messages = [
+        _ = [
             ["role": "system", "content": "You are a helpful task planning assistant. Create a structured task based on the user's input."],
             ["role": "user", "content": prompt]
         ]
@@ -62,7 +66,7 @@ class TaskViewModel: ObservableObject {
 
 extension TaskViewModel {
     func updateTask(_ task: Task, newTitle: String, newDescription: String,
-                   newDueDate: Date, newPriority: Task.TaskPriority,
+                    newDueDate: Date, newPriority: Task.Priority,
                    newCategories: [String]) {
         if let index = tasks.firstIndex(where: { $0.id == task.id }) {
             tasks[index].title = newTitle
@@ -121,3 +125,20 @@ extension TaskViewModel {
         return tasks.filter { $0.createdAt >= startDate }
     }
 }
+// 
+//extension TaskViewModel {
+//    func addTask(_ task: Task) {
+//        tasks.append(task)
+//        saveTasks()
+//        generateSuggestions(for: task)
+//        NotificationManager.shared.scheduleNotification(for: task)
+//    }
+//    
+//    func deleteTask(_ task: Task) {
+//        tasks.removeAll(where: { $0.id == task.id })
+//        saveTasks()
+//        NotificationManager.shared.cancelNotification(for: task)
+//    }
+//}
+
+

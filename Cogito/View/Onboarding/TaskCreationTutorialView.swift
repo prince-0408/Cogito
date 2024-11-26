@@ -1,3 +1,11 @@
+//
+//  TaskCreationTutorialView.swift
+//  Cogito
+//
+//  Created by Prince Yadav on 25/11/24.
+//
+import SwiftUI
+
 // TaskCreationTutorialView.swift
 struct TaskCreationTutorialView: View {
     @State private var showingDemoTask = false
@@ -66,7 +74,7 @@ struct TaskCreationTutorialView: View {
                         
                         Spacer()
                         
-                        PriorityBadge(priority: demoPriority)
+//                        Priority(priority: demoPriority)
                     }
                     .padding()
                     .background(Color(.systemGray6))

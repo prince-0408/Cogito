@@ -8,8 +8,10 @@
 import SwiftUI
 
 struct TaskRowView: View {
-    let task: Task
+    var task: Task
     let onToggle: () -> Void
+    @ObservedObject var viewModel: TaskViewModel
+
     
     var body: some View {
         HStack {
@@ -44,4 +46,9 @@ struct TaskRowView: View {
         }
         .padding(.vertical, 8)
     }
+    private func formatDate(_ date: Date) -> String {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .medium
+            return formatter.string(from: date)
+        }
 }

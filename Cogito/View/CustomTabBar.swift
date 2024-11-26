@@ -1,4 +1,11 @@
-// CustomTabBar.swift
+//
+//  CustomTabBar.swift
+//  Cogito
+//
+//  Created by Prince Yadav on 25/11/24.
+//
+import SwiftUI
+
 struct CustomTabBar: View {
     @Binding var selectedTab: Tab
     @Namespace private var namespace

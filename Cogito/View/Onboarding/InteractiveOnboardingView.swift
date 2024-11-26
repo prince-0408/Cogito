@@ -1,3 +1,11 @@
+//
+//  InteractiveOnboardingView.swift
+//  Cogito
+//
+//  Created by Prince Yadav on 25/11/24.
+//
+
+import SwiftUI
 // InteractiveOnboardingView.swift
 struct InteractiveOnboardingView: View {
     @StateObject private var onboardingManager = OnboardingManager()

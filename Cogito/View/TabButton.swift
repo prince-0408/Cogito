@@ -1,4 +1,12 @@
-// Custom Tab Button
+//
+//  TabButton.swift
+//  Cogito
+//
+//  Created by Prince Yadav on 25/11/24.
+//
+import SwiftUI
+import CloudKit
+
 struct TabButton: View {
     let title: String
     let isSelected: Bool
@@ -24,3 +32,7 @@ struct TabButton: View {
         .padding(.vertical, 8)
     }
 }
+
+//#Preview {
+//    TabButton(title: String(), isSelected: Bool(), namespace: ID, action: () -> voidprint("Hello, World!"))
+//}

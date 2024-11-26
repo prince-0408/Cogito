@@ -14,7 +14,7 @@ struct AnimatedTaskRow: View {
     @State private var opacity: Double = 0
     
     var body: some View {
-        TaskRowView(task: task, onToggle: onToggle)
+        TaskRowView(task: task, onToggle: onToggle, viewModel: TaskViewModel())
             .offset(x: offset)
             .opacity(opacity)
             .onAppear {

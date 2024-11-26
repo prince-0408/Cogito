@@ -1,3 +1,11 @@
+//
+//  CalendarView.swift
+//  Cogito
+//
+//  Created by Prince Yadav on 25/11/24.
+//
+
+
 import SwiftUI
 
 struct CalendarView: View {
@@ -23,10 +31,10 @@ struct CalendarView: View {
                         .font(.headline)
                         .padding(.horizontal)
                     
-                    ForEach(tasksForSelectedDate) { task in
-                        TaskCard(task: task, viewModel: viewModel)
-                            .padding(.horizontal)
-                    }
+//                    ForEach(tasksForSelectedDate) { task in
+//                        TaskCard(task: task, viewModel: viewModel)
+//                            .padding(.horizontal)
+//                    }
                 }
             }
             .padding(.vertical)

@@ -1,4 +1,12 @@
-// ThemeSettingsView.swift
+//
+//  ThemeSettingsView.swift
+//  Cogito
+//
+//  Created by Prince Yadav on 25/11/24.
+//
+
+import SwiftUI
+
 struct ThemeSettingsView: View {
     @EnvironmentObject var themeManager: ThemeManager
     

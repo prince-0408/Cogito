@@ -8,9 +8,12 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var viewModel = TaskViewModel()
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @ObservedObject private var viewModel = TaskViewModel()
     @State private var promptText = ""
     @State private var showingAddTask = false
+    //    @StateObject private var userAuth = UserAuth()
+    
     
     var body: some View {
         NavigationView {
@@ -23,10 +26,10 @@ struct ContentView: View {
                             .padding()
                         
                         Button(action: {
-//                            Task {
-//                                await viewModel.generateTask(from: promptText)
-//                                promptText = "hi"
-//                            }
+                            //                            Task {
+                            //                                await viewModel.generateTask(from: promptText)
+                            //                                promptText = "hi"
+                            //                            }
                         }) {
                             Image(systemName: "wand.and.stars")
                                 .foregroundColor(.white)
@@ -38,39 +41,47 @@ struct ContentView: View {
                         .padding(.trailing)
                     }
                     
-                    // Task List
-                    List {
-                        ForEach(viewModel.tasks) { task in
-                            TaskRowView(task: task) {
-                                viewModel.toggleTaskCompletion(task)
-                            }
+//                    Task; List
+//                    List {
+//                        ForEach(viewModel.tasks) { task in
+//                            TaskRowView(task: task) {
+//                                viewModel.toggleTaskCompletion(task)
+//                            }
                         }
-                    }
-                }
-                
-                if viewModel.isLoading {
-                    ProgressView()
-                        .scaleEffect(1.5)
-                        .progressViewStyle(CircularProgressViewStyle(tint: .blue))
-                        .background(Color.white.opacity(0.8))
-                }
-            }
-            .navigationTitle("Cogito 🧠")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showingAddTask = true }) {
-                        Image(systemName: "plus")
                         
-                        NavigationView {
-                            Enhanced3DTaskListView(viewModel: viewModel)
+                    }
+                    
+                    if viewModel.isLoading {
+                        ProgressView()
+                            .scaleEffect(1.5)
+                            .progressViewStyle(CircularProgressViewStyle(tint: .blue))
+                            .background(Color.white.opacity(0.8))
+                    }
+                }
+                .navigationTitle("Cogito 🧠")
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: { showingAddTask = true }) {
+                            Image(systemName: "plus")
+                            
+//                            NavigationView {
+//                                Enhanced3DTaskListView(viewModel: viewModel)
+//                            }
                         }
                     }
                 }
+                //            Group {
+                //                        if !hasCompletedOnboarding {
+                //                            OnboardingView()
+                //                        } else if !userAuth.isAuthenticated {
+                //                            LoginView()
+                //                        } else {
+                //                            MainTaskListView()
+                //                        }
+                //                    }
+                //                    .environmentObject(ThemeManager.shared)
+                //
             }
+            
         }
-    }
-}
-
-#Preview {
-    ContentView()
-}
+ 

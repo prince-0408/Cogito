@@ -1,3 +1,11 @@
+//
+//  TabBarButton.swift
+//  Cogito
+//
+//  Created by Prince Yadav on 25/11/24.
+//
+
+import SwiftUI
 // TabBarButton.swift
 struct TabBarButton: View {
     let tab: TabBarItem
@@ -20,11 +28,11 @@ struct TabBarButton: View {
                     .font(.caption2)
                     .fontWeight(.semibold)
             }
-            .foregroundColor(selectedTab == tab.tab ? themeManager.currentTheme.primaryColor : .gray)
+//            .foregroundColor(selectedTab == tab.tab ? themeManager.currentTheme.primaryColor : .gray)
             .overlay {
                 if selectedTab == tab.tab {
                     Capsule()
-                        .fill(themeManager.currentTheme.primaryColor)
+//                        .fill(themeManager.currentTheme.primaryColor)
                         .frame(height: 2)
                         .offset(y: 16)
                         .matchedGeometryEffect(id: "tab", in: namespace)

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+
 struct CompletionButton: View {
     let isCompleted: Bool
     let action: () -> Void

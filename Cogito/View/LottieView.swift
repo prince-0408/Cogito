@@ -1,4 +1,14 @@
+//
+//  LottieView.swift
+//  Cogito
+//
+//  Created by Prince Yadav on 25/11/24.
+//
+
+
 import Lottie
+import UIKit
+import SwiftUI
 
 struct LottieView: UIViewRepresentable {
     let name: String
