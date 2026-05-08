@@ -85,22 +85,34 @@ struct MainTabView: View {
     @EnvironmentObject private var aiViewModel: AIViewModel
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            TabView(selection: $selectedTab) {
-                HomeView()
-                    .tag(0)
-                
-                HeatmapCalendarView(taskViewModel: TaskViewModel())
-                    .tag(1)
-                
-                InsightsView()
-                    .tag(2)
-                
-                SettingsView()
-                    .tag(3)
-            }
-            CustomTabBar(selectedTab: $selectedTab)
+        TabView(selection: $selectedTab) {
+            HomeView()
+                .tabItem {
+                    Image(systemName: "house.fill")
+                    Text("Home")
+                }
+                .tag(0)
+            
+            HeatmapCalendarView(taskViewModel: TaskViewModel())
+                .tabItem {
+                    Image(systemName: "calendar")
+                    Text("Heatmap")
+                }
+                .tag(1)
+            
+            InsightsView()
+                .tabItem {
+                    Image(systemName: "chart.bar.fill")
+                    Text("Insights")
+                }
+                .tag(2)
+            
+            SettingsView()
+                .tabItem {
+                    Image(systemName: "gearshape.fill")
+                    Text("Settings")
+                }
+                .tag(3)
         }
-        .edgesIgnoringSafeArea(.bottom) // Ensures tab bar floats nicely
     }
 }
