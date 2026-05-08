@@ -5,6 +5,7 @@ struct CustomButton: View {
     let icon: String?
     let style: ButtonStyle
     let action: () -> Void
+    @State private var isPressed = false
     
     enum ButtonStyle {
         case primary
@@ -52,7 +53,11 @@ struct CustomButton: View {
     }
     
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+            impactFeedback.impactOccurred()
+            action()
+        }) {
             HStack {
                 if let icon = icon {
                     Image(systemName: icon)
@@ -71,6 +76,15 @@ struct CustomButton: View {
                     .stroke(style.borderColor, lineWidth: style == .outline ? 2 : 0)
             )
         }
+        .scaleEffect(isPressed ? 0.95 : 1.0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isPressed)
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in isPressed = true }
+                .onEnded { _ in isPressed = false }
+        )
+        .accessibilityLabel(icon != nil ? "\(title), button" : title)
+        .accessibilityAddTraits(.isButton)
     }
 }
 

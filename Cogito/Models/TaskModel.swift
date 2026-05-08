@@ -64,7 +64,7 @@ enum TaskCategory: String, CaseIterable, Codable {
     }
 }
 
-struct Task: Identifiable, Codable {
+struct Task: Identifiable, Codable, Equatable {
     var id: UUID = UUID()
     var title: String
     var description: String = ""

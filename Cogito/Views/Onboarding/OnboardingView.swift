@@ -6,6 +6,7 @@ struct OnboardingView: View {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
     @AppStorage("isDarkMode") private var isDarkMode: Bool = false
     @AppStorage("appTheme") private var appTheme: String = "blue"
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
     let pages = [
         OnboardingPage(
@@ -59,7 +60,7 @@ struct OnboardingView: View {
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
-            .animation(.easeInOut(duration: 0.7), value: currentPage)
+            .animation(reduceMotion ? .none : .easeInOut(duration: 0.7), value: currentPage)
             
             VStack(spacing: 0) {
                 
@@ -83,7 +84,7 @@ struct OnboardingView: View {
                     }
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                .animation(.smooth, value: currentPage)
+                .animation(reduceMotion ? .none : .smooth, value: currentPage)
                 
                 Spacer()
                 
@@ -99,7 +100,7 @@ struct OnboardingView: View {
             }
         }
         .onChange(of: currentPage) { newValue in
-            withAnimation(.smooth(duration: 0.6)) {
+            withAnimation(reduceMotion ? .none : .smooth(duration: 0.6)) {
                 progress = CGFloat(newValue) / CGFloat(pages.count - 1)
             }
         }
@@ -178,6 +179,7 @@ struct OnboardingPageView: View {
     @Binding var currentPage: Int
     let totalPages: Int
     let onComplete: () -> Void
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
     var body: some View {
         ZStack {
@@ -212,7 +214,7 @@ struct OnboardingPageView: View {
             }
         }
         .onAppear {
-            withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
+            withAnimation(reduceMotion ? .none : .easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
                 isAnimated = true
             }
         }

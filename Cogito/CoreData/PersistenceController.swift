@@ -86,7 +86,18 @@ struct PersistenceController {
         ]
         
         for task in sampleTasks {
-            let _ = TaskEntity.create(from: task, in: context)
+            let entity = NSEntityDescription.insertNewObject(forEntityName: "TaskEntity", into: context) as! NSManagedObject
+            entity.setValue(task.id, forKey: "id")
+            entity.setValue(task.title, forKey: "title")
+            entity.setValue(task.description, forKey: "taskDescription")
+            entity.setValue(task.category.rawValue, forKey: "categoryRaw")
+            entity.setValue(task.priority.rawValue, forKey: "priorityRaw")
+            entity.setValue(task.dueDate, forKey: "dueDate")
+            entity.setValue(task.isCompleted, forKey: "isCompleted")
+            entity.setValue(task.completedDate, forKey: "completedDate")
+            entity.setValue(task.createdAt, forKey: "createdAt")
+            entity.setValue(task.reminderTime, forKey: "reminderTime")
+            entity.setValue(task.tags.joined(separator: ","), forKey: "tagsRaw")
         }
         
         do {

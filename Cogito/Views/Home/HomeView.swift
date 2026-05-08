@@ -6,6 +6,16 @@ struct HomeView: View {
     @State private var showingNewTaskSheet = false
     @State private var showingTaskDetail: Task?
     @State private var selectedCategory: TaskCategory?
+    @State private var animateTasks = false
+    @State private var isEditMode = false
+    @State private var showCelebration = false
+    @State private var currentAchievement: AchievementType = .firstTask
+    
+    private var displayedTasks: [Task] {
+        taskViewModel.filteredTasks.filter {
+            selectedCategory == nil || $0.category == selectedCategory
+        }
+    }
     
     var body: some View {
         NavigationView {
@@ -32,17 +42,44 @@ struct HomeView: View {
                             
                             Spacer()
                             
-                            Button(action: {
-                                showingNewTaskSheet = true
-                            }) {
-                                Image(systemName: "plus")
-                                    .font(.title2)
-                                    .foregroundColor(Color("Primary"))
-                                    .padding()
-                                    .background(
-                                        Circle()
-                                            .fill(Color("Primary").opacity(0.2))
-                                    )
+                            HStack(spacing: 12) {
+                                Button(action: {
+                                    isEditMode.toggle()
+                                    let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                                    impactFeedback.impactOccurred()
+                                }) {
+                                    Text(isEditMode ? "Done" : "Edit")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(Color("Primary"))
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(
+                                            Capsule()
+                                                .fill(Color("Primary").opacity(0.2))
+                                        )
+                                }
+                                .accessibilityLabel(isEditMode ? "Done editing" : "Edit tasks")
+                                .accessibilityHint(isEditMode ? "Exit edit mode" : "Enter edit mode to reorder tasks")
+                                .accessibilityAddTraits(.isButton)
+                                
+                                Button(action: {
+                                    let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                                    impactFeedback.impactOccurred()
+                                    showingNewTaskSheet = true
+                                }) {
+                                    Image(systemName: "plus")
+                                        .font(.title2)
+                                        .foregroundColor(Color("Primary"))
+                                        .padding()
+                                        .background(
+                                            Circle()
+                                                .fill(Color("Primary").opacity(0.2))
+                                        )
+                                }
+                                .accessibilityLabel("Create new task")
+                                .accessibilityHint("Opens the task creation screen")
+                                .accessibilityAddTraits(.isButton)
                             }
                         }
                         .padding(.horizontal)
@@ -108,14 +145,17 @@ struct HomeView: View {
                             if taskViewModel.filteredTasks.isEmpty {
                                 EmptyTaskView()
                             } else {
-                                ForEach(taskViewModel.filteredTasks.filter { 
-                                    selectedCategory == nil || $0.category == selectedCategory
-                                }) { task in
-                                    TaskCard(task: task)
-                                        .onTapGesture {
-                                            showingTaskDetail = task
-                                        }
+                                List {
+                                    ForEach(displayedTasks) { task in
+                                        taskRow(for: task)
+                                    }
+                                    .onMove { source, destination in
+                                        taskViewModel.moveTask(from: source, to: destination)
+                                    }
                                 }
+                                .listStyle(.plain)
+                                .scrollContentBackground(.hidden)
+                                .environment(\.editMode, isEditMode ? .constant(.active) : .constant(.inactive))
                             }
                         }
                         .padding(.horizontal)
@@ -123,6 +163,9 @@ struct HomeView: View {
                     .padding(.vertical)
                 }
             }
+            .overlay(
+                CelebrationView(isPresented: $showCelebration, achievementType: currentAchievement)
+            )
             .navigationBarHidden(true)
             .sheet(isPresented: $showingNewTaskSheet) {
                 NewTaskView()
@@ -135,8 +178,67 @@ struct HomeView: View {
             }
             .onAppear {
                 aiViewModel.generateTaskSuggestions(basedOn: taskViewModel.tasks)
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    animateTasks = true
+                }
+            }
+            .onChange(of: taskViewModel.tasks) { _ in
+                checkAchievements()
             }
         }
+    }
+    
+    private func checkAchievements() {
+        let completedTasks = taskViewModel.tasks.filter { $0.isCompleted }
+        let totalTasks = taskViewModel.tasks.count
+        
+        // Check for achievements
+        if completedTasks.count == 1 && totalTasks >= 1 {
+            currentAchievement = .firstTask
+            showCelebration = true
+        } else if completedTasks.count == 5 {
+            currentAchievement = .fiveTasks
+            showCelebration = true
+        } else if totalTasks > 0 && completedTasks.count == totalTasks {
+            currentAchievement = .allTasks
+            showCelebration = true
+        }
+    }
+    
+    @ViewBuilder
+    private func taskRow(for task: Task) -> some View {
+        TaskCard(task: task)
+            .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+            .onTapGesture {
+                showingTaskDetail = task
+            }
+            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                Button(role: .destructive) {
+                    withAnimation {
+                        taskViewModel.deleteTask(id: task.id)
+                    }
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+                
+                Button {
+                    withAnimation {
+                        if task.isCompleted {
+                            var updatedTask = task
+                            updatedTask.isCompleted = false
+                            updatedTask.completedDate = nil
+                            taskViewModel.updateTask(updatedTask)
+                        } else {
+                            taskViewModel.markTaskAsCompleted(task)
+                        }
+                    }
+                } label: {
+                    Label(task.isCompleted ? "Mark Incomplete" : "Complete", systemImage: task.isCompleted ? "circle" : "checkmark.circle")
+                }
+                .tint(task.isCompleted ? .orange : .green)
+            }
     }
 }
 
@@ -177,7 +279,11 @@ struct SuggestionCard: View {
                 
                 Spacer()
                 
-                Button(action: onAccept) {
+                Button(action: {
+                    let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                    impactFeedback.impactOccurred()
+                    onAccept()
+                }) {
                     Text("Add")
                         .font(.caption)
                         .fontWeight(.medium)
@@ -187,6 +293,9 @@ struct SuggestionCard: View {
                         .foregroundColor(.white)
                         .cornerRadius(8)
                 }
+                .accessibilityLabel("Add suggested task")
+                .accessibilityHint("Add \(suggestion.title) to your tasks")
+                .accessibilityAddTraits(.isButton)
             }
         }
         .padding()
@@ -196,6 +305,10 @@ struct SuggestionCard: View {
                 .fill(Color("CardBackground"))
                 .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
         )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("AI suggested task: \(suggestion.title)")
+        .accessibilityHint("\(suggestion.category.rawValue) category, \(suggestion.priority.rawValue) priority, \(Int(suggestion.confidence * 100))% confidence")
+        .accessibilityAddTraits(.isButton)
     }
 }
 
@@ -218,6 +331,10 @@ struct CategoryFilterButton: View {
                 )
                 .foregroundColor(isSelected ? color : Color("TextPrimary"))
         }
+        .accessibilityLabel("Filter by \(title)")
+        .accessibilityHint(isSelected ? "Selected filter" : "Tap to filter by \(title)")
+        .accessibilityAddTraits(.isButton)
+        .accessibilityValue(isSelected ? "Selected" : "Not selected")
     }
 }
 
@@ -265,11 +382,17 @@ struct TaskCard: View {
             .padding(.leading, 8)
             
             // Completion checkbox
-            Button(action: {}) {
+            Button(action: {
+                let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                impactFeedback.impactOccurred()
+            }) {
                 Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(task.isCompleted ? Color("Primary") : Color("TextPrimary").opacity(0.6))
                     .font(.title3)
             }
+            .accessibilityLabel(task.isCompleted ? "Task completed" : "Mark task as completed")
+            .accessibilityHint("Double tap to toggle completion status")
+            .accessibilityAddTraits(.isButton)
         }
         .padding()
         .background(
@@ -277,6 +400,10 @@ struct TaskCard: View {
                 .fill(Color("CardBackground"))
                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
         )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(task.title), \(task.category.rawValue) category, \(task.priority.rawValue) priority")
+        .accessibilityHint("Due \(task.formattedDueDate). Double tap to view details")
+        .accessibilityAddTraits(task.isCompleted ? [.isButton, .isSelected] : .isButton)
     }
 }
 

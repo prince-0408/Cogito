@@ -14,12 +14,12 @@ class TaskDataService {
     // MARK: - CRUD Operations
     
     func fetchAllTasks() -> [Task] {
-        let fetchRequest: NSFetchRequest<TaskEntity> = TaskEntity.fetchRequest()
-        fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \TaskEntity.dueDate, ascending: true)]
+        let fetchRequest: NSFetchRequest<NSManagedObject> = NSFetchRequest(entityName: "TaskEntity")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "dueDate", ascending: true)]
         
         do {
             let taskEntities = try context.fetch(fetchRequest)
-            return taskEntities.map { $0.toTask() }
+            return taskEntities.map { entityToTask($0) }
         } catch {
             print("Error fetching tasks: \(error)")
             return []
@@ -31,13 +31,13 @@ class TaskDataService {
         let startOfDay = calendar.startOfDay(for: date)
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
         
-        let fetchRequest: NSFetchRequest<TaskEntity> = TaskEntity.fetchRequest()
+        let fetchRequest: NSFetchRequest<NSManagedObject> = NSFetchRequest(entityName: "TaskEntity")
         fetchRequest.predicate = NSPredicate(format: "dueDate >= %@ AND dueDate < %@", startOfDay as NSDate, endOfDay as NSDate)
-        fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \TaskEntity.dueDate, ascending: true)]
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "dueDate", ascending: true)]
         
         do {
             let taskEntities = try context.fetch(fetchRequest)
-            return taskEntities.map { $0.toTask() }
+            return taskEntities.map { entityToTask($0) }
         } catch {
             print("Error fetching tasks for date: \(error)")
             return []
@@ -49,12 +49,12 @@ class TaskDataService {
         let startOfDay = calendar.startOfDay(for: date)
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
         
-        let fetchRequest: NSFetchRequest<TaskEntity> = TaskEntity.fetchRequest()
+        let fetchRequest: NSFetchRequest<NSManagedObject> = NSFetchRequest(entityName: "TaskEntity")
         fetchRequest.predicate = NSPredicate(format: "isCompleted == YES AND completedDate >= %@ AND completedDate < %@", startOfDay as NSDate, endOfDay as NSDate)
         
         do {
             let taskEntities = try context.fetch(fetchRequest)
-            return taskEntities.map { $0.toTask() }
+            return taskEntities.map { entityToTask($0) }
         } catch {
             print("Error fetching completed tasks for date: \(error)")
             return []
@@ -64,10 +64,10 @@ class TaskDataService {
     func saveTask(_ task: Task) -> Task {
         // Check if task already exists
         if let existingEntity = fetchTaskEntity(with: task.id) {
-            existingEntity.update(from: task)
+            updateEntity(existingEntity, from: task)
             print("Updated existing task: \(task.title)")
         } else {
-            let _ = TaskEntity.create(from: task, in: context)
+            createEntity(from: task)
             print("Created new task: \(task.title)")
         }
         
@@ -105,7 +105,7 @@ class TaskDataService {
     }
     
     func deleteAllTasks() {
-        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = TaskEntity.fetchRequest()
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "TaskEntity")
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
         
         do {
@@ -122,8 +122,8 @@ class TaskDataService {
     
     // MARK: - Helper Methods
     
-    private func fetchTaskEntity(with id: UUID) -> TaskEntity? {
-        let fetchRequest: NSFetchRequest<TaskEntity> = TaskEntity.fetchRequest()
+    private func fetchTaskEntity(with id: UUID) -> NSManagedObject? {
+        let fetchRequest: NSFetchRequest<NSManagedObject> = NSFetchRequest(entityName: "TaskEntity")
         fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
         fetchRequest.fetchLimit = 1
         
@@ -134,6 +134,45 @@ class TaskDataService {
             print("Error fetching task entity: \(error)")
             return nil
         }
+    }
+    
+    private func createEntity(from task: Task) {
+        let entity = NSEntityDescription.insertNewObject(forEntityName: "TaskEntity", into: context)
+        updateEntity(entity, from: task)
+    }
+    
+    private func updateEntity(_ entity: NSManagedObject, from task: Task) {
+        entity.setValue(task.id, forKey: "id")
+        entity.setValue(task.title, forKey: "title")
+        entity.setValue(task.description, forKey: "taskDescription")
+        entity.setValue(task.category.rawValue, forKey: "categoryRaw")
+        entity.setValue(task.priority.rawValue, forKey: "priorityRaw")
+        entity.setValue(task.dueDate, forKey: "dueDate")
+        entity.setValue(task.isCompleted, forKey: "isCompleted")
+        entity.setValue(task.completedDate, forKey: "completedDate")
+        entity.setValue(task.createdAt, forKey: "createdAt")
+        entity.setValue(task.reminderTime, forKey: "reminderTime")
+        entity.setValue(task.tags.joined(separator: ","), forKey: "tagsRaw")
+    }
+    
+    private func entityToTask(_ entity: NSManagedObject) -> Task {
+        let categoryRaw = entity.value(forKey: "categoryRaw") as? String ?? "other"
+        let priorityRaw = entity.value(forKey: "priorityRaw") as? String ?? "medium"
+        let tagsRaw = entity.value(forKey: "tagsRaw") as? String ?? ""
+        
+        return Task(
+            id: entity.value(forKey: "id") as? UUID ?? UUID(),
+            title: entity.value(forKey: "title") as? String ?? "",
+            description: entity.value(forKey: "taskDescription") as? String ?? "",
+            category: TaskCategory(rawValue: categoryRaw) ?? .other,
+            priority: TaskPriority(rawValue: priorityRaw) ?? .medium,
+            dueDate: entity.value(forKey: "dueDate") as? Date ?? Date(),
+            isCompleted: entity.value(forKey: "isCompleted") as? Bool ?? false,
+            completedDate: entity.value(forKey: "completedDate") as? Date,
+            createdAt: entity.value(forKey: "createdAt") as? Date ?? Date(),
+            reminderTime: entity.value(forKey: "reminderTime") as? Date,
+            tags: tagsRaw.components(separatedBy: ",").filter { !$0.isEmpty }
+        )
     }
     
     // MARK: - Calendar Data Generation

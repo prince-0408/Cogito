@@ -55,6 +55,16 @@ struct CogitoApp: App {
                             }
                         }
                     }
+                    .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("TaskCreatedFromSiri"))) { notification in
+                        // Handle task created from Siri
+                        if let task = notification.object as? Task {
+                            taskViewModel.addTask(task)
+                        }
+                    }
+                    .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("CompleteTaskFromSiri"))) { _ in
+                        // Handle task completion from Siri
+                        // In a real implementation, this would show a task selection UI
+                    }
             } else {
                 OnboardingView()
                     .preferredColorScheme(isDarkMode ? .dark : .light)
@@ -84,35 +94,89 @@ struct MainTabView: View {
     @EnvironmentObject private var taskViewModel: TaskViewModel
     @EnvironmentObject private var aiViewModel: AIViewModel
     
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    
     var body: some View {
-        TabView(selection: $selectedTab) {
-            HomeView()
-                .tabItem {
-                    Image(systemName: "house.fill")
-                    Text("Home")
+        if horizontalSizeClass == .regular {
+            // iPad layout with sidebar
+            NavigationSplitView {
+                SidebarView(selectedTab: $selectedTab)
+            } detail: {
+                TabView(selection: $selectedTab) {
+                    HomeView()
+                        .tag(0)
+                    
+                    HeatmapCalendarView(taskViewModel: TaskViewModel())
+                        .tag(1)
+                    
+                    InsightsView()
+                        .tag(2)
+                    
+                    SettingsView()
+                        .tag(3)
                 }
+                .navigationSplitViewColumnWidth(min: 300, ideal: 400)
+            }
+        } else {
+            // iPhone layout with tab bar
+            TabView(selection: $selectedTab) {
+                HomeView()
+                    .tabItem {
+                        Image(systemName: "house.fill")
+                        Text("Home")
+                    }
+                    .tag(0)
+                
+                HeatmapCalendarView(taskViewModel: TaskViewModel())
+                    .tabItem {
+                        Image(systemName: "calendar")
+                        Text("Heatmap")
+                    }
+                    .tag(1)
+                
+                InsightsView()
+                    .tabItem {
+                        Image(systemName: "chart.bar.fill")
+                        Text("Insights")
+                    }
+                    .tag(2)
+                
+                SettingsView()
+                    .tabItem {
+                        Image(systemName: "gearshape.fill")
+                        Text("Settings")
+                    }
+                    .tag(3)
+            }
+        }
+    }
+}
+
+struct SidebarView: View {
+    @Binding var selectedTab: Int
+    
+    private var selectionBinding: Binding<Int?> {
+        Binding<Int?>(
+            get: { selectedTab },
+            set: { if let newValue = $0 { selectedTab = newValue } }
+        )
+    }
+    
+    var body: some View {
+        List(selection: selectionBinding) {
+            Label("Home", systemImage: "house.fill")
                 .tag(0)
             
-            HeatmapCalendarView(taskViewModel: TaskViewModel())
-                .tabItem {
-                    Image(systemName: "calendar")
-                    Text("Heatmap")
-                }
+            Label("Heatmap", systemImage: "calendar")
                 .tag(1)
             
-            InsightsView()
-                .tabItem {
-                    Image(systemName: "chart.bar.fill")
-                    Text("Insights")
-                }
+            Label("Insights", systemImage: "chart.bar.fill")
                 .tag(2)
             
-            SettingsView()
-                .tabItem {
-                    Image(systemName: "gearshape.fill")
-                    Text("Settings")
-                }
+            Label("Settings", systemImage: "gearshape.fill")
                 .tag(3)
         }
+        .navigationTitle("Cogito")
+        .listStyle(.sidebar)
     }
 }

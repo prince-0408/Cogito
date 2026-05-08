@@ -18,10 +18,20 @@ extension TaskViewModel {
             let savedTask = dataService.saveTask(task)
             tasks.append(savedTask)
             generateCalendarData()
+            
+            // Start Live Activity for the new task
+            if #available(iOS 16.1, *) {
+                LiveActivityManager.shared.startLiveActivity(for: savedTask)
+            }
         } else {
             // Fallback to in-memory storage
             tasks.append(task)
             generateCalendarData()
+            
+            // Start Live Activity for the new task
+            if #available(iOS 16.1, *) {
+                LiveActivityManager.shared.startLiveActivity(for: task)
+            }
         }
     }
     
@@ -46,10 +56,20 @@ extension TaskViewModel {
             dataService.deleteTask(id: id)
             tasks.removeAll(where: { $0.id == id })
             generateCalendarData()
+            
+            // End Live Activity for deleted task
+            if #available(iOS 16.1, *) {
+                LiveActivityManager.shared.endLiveActivity(for: id)
+            }
         } else {
             // Fallback to in-memory storage
             tasks.removeAll(where: { $0.id == id })
             generateCalendarData()
+            
+            // End Live Activity for deleted task
+            if #available(iOS 16.1, *) {
+                LiveActivityManager.shared.endLiveActivity(for: id)
+            }
         }
     }
     
@@ -63,12 +83,28 @@ extension TaskViewModel {
                 tasks[index] = savedTask
             }
             generateCalendarData()
+            
+            // Update and then end Live Activity
+            if #available(iOS 16.1, *) {
+                LiveActivityManager.shared.updateLiveActivity(for: savedTask)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    LiveActivityManager.shared.endLiveActivity(for: savedTask.id)
+                }
+            }
         } else {
             // Fallback to in-memory storage
             var updatedTask = task
             updatedTask.isCompleted = true
             updatedTask.completedDate = Date()
             updateTask(updatedTask)
+            
+            // Update and then end Live Activity
+            if #available(iOS 16.1, *) {
+                LiveActivityManager.shared.updateLiveActivity(for: updatedTask)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    LiveActivityManager.shared.endLiveActivity(for: updatedTask.id)
+                }
+            }
         }
     }
     
@@ -100,6 +136,18 @@ extension TaskViewModel {
                     calendarData[i].days[j].taskCount = tasksForDay.count
                     calendarData[i].days[j].completedCount = completedTasks.count
                 }
+            }
+        }
+    }
+    
+    func moveTask(from source: IndexSet, to destination: Int) {
+        tasks.move(fromOffsets: source, toOffset: destination)
+        
+        // Update data service if available
+        if let dataService = taskDataService {
+            // Re-save all tasks to maintain order
+            for task in tasks {
+                _ = dataService.saveTask(task)
             }
         }
     }
