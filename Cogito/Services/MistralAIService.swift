@@ -21,9 +21,11 @@ enum MistralAIError: Error {
 }
 
 class MistralAIService {
-    // Built-in API key - in a real app, this would be more securely stored
-    // or retrieved from a backend service
-    private let apiKey = "7HqXeQFbL2oZuPcC9UWsX7DM91Siin85" // Mistral AI API key
+    // Dynamic API key - retrieves user custom key if available, otherwise falls back to build-in demo key
+    private var apiKey: String {
+        let customKey = UserDefaults.standard.string(forKey: "mistralApiKey") ?? ""
+        return customKey.isEmpty ? "7HqXeQFbL2oZuPcC9UWsX7DM91Siin85" : customKey
+    }
     private let baseURL = "https://api.mistral.ai/v1"
     private let model = "mistral-medium" // Mistral AI model
     

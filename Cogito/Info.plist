@@ -48,6 +48,8 @@
 	</array>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>We need to send you reminders about your upcoming tasks.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 </dict>
 </plist>
 

@@ -142,20 +142,14 @@ struct HomeView: View {
                                 .foregroundColor(Color("TextPrimary"))
                                 .padding(.horizontal)
                             
-                            if taskViewModel.filteredTasks.isEmpty {
+                            if displayedTasks.isEmpty {
                                 EmptyTaskView()
                             } else {
-                                List {
+                                LazyVStack(spacing: 12) {
                                     ForEach(displayedTasks) { task in
                                         taskRow(for: task)
                                     }
-                                    .onMove { source, destination in
-                                        taskViewModel.moveTask(from: source, to: destination)
-                                    }
                                 }
-                                .listStyle(.plain)
-                                .scrollContentBackground(.hidden)
-                                .environment(\.editMode, isEditMode ? .constant(.active) : .constant(.inactive))
                             }
                         }
                         .padding(.horizontal)
@@ -207,38 +201,32 @@ struct HomeView: View {
     
     @ViewBuilder
     private func taskRow(for task: Task) -> some View {
-        TaskCard(task: task)
-            .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-            .listRowSeparator(.hidden)
-            .listRowBackground(Color.clear)
-            .onTapGesture {
+        TaskCard(
+            task: task,
+            isEditMode: isEditMode,
+            onToggleCompletion: {
+                withAnimation {
+                    if task.isCompleted {
+                        var updatedTask = task
+                        updatedTask.isCompleted = false
+                        updatedTask.completedDate = nil
+                        taskViewModel.updateTask(updatedTask)
+                    } else {
+                        taskViewModel.markTaskAsCompleted(task)
+                    }
+                }
+            },
+            onDelete: {
+                withAnimation {
+                    taskViewModel.deleteTask(id: task.id)
+                }
+            }
+        )
+        .onTapGesture {
+            if !isEditMode {
                 showingTaskDetail = task
             }
-            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                Button(role: .destructive) {
-                    withAnimation {
-                        taskViewModel.deleteTask(id: task.id)
-                    }
-                } label: {
-                    Label("Delete", systemImage: "trash")
-                }
-                
-                Button {
-                    withAnimation {
-                        if task.isCompleted {
-                            var updatedTask = task
-                            updatedTask.isCompleted = false
-                            updatedTask.completedDate = nil
-                            taskViewModel.updateTask(updatedTask)
-                        } else {
-                            taskViewModel.markTaskAsCompleted(task)
-                        }
-                    }
-                } label: {
-                    Label(task.isCompleted ? "Mark Incomplete" : "Complete", systemImage: task.isCompleted ? "circle" : "checkmark.circle")
-                }
-                .tint(task.isCompleted ? .orange : .green)
-            }
+        }
     }
 }
 
@@ -340,9 +328,25 @@ struct CategoryFilterButton: View {
 
 struct TaskCard: View {
     let task: Task
+    var isEditMode: Bool = false
+    let onToggleCompletion: () -> Void
+    var onDelete: (() -> Void)? = nil
     
     var body: some View {
         HStack {
+            if isEditMode {
+                Button(action: {
+                    let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                    impactFeedback.impactOccurred()
+                    onDelete?()
+                }) {
+                    Image(systemName: "minus.circle.fill")
+                        .foregroundColor(.red)
+                        .font(.title3)
+                }
+                .transition(.move(edge: .leading).combined(with: .opacity))
+            }
+            
             // Priority indicator
             Rectangle()
                 .fill(task.priority.color)
@@ -381,18 +385,21 @@ struct TaskCard: View {
             }
             .padding(.leading, 8)
             
-            // Completion checkbox
-            Button(action: {
-                let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-                impactFeedback.impactOccurred()
-            }) {
-                Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(task.isCompleted ? Color("Primary") : Color("TextPrimary").opacity(0.6))
-                    .font(.title3)
+            if !isEditMode {
+                // Completion checkbox
+                Button(action: {
+                    let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                    impactFeedback.impactOccurred()
+                    onToggleCompletion()
+                }) {
+                    Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
+                        .foregroundColor(task.isCompleted ? Color("Primary") : Color("TextPrimary").opacity(0.6))
+                        .font(.title3)
+                }
+                .accessibilityLabel(task.isCompleted ? "Task completed" : "Mark task as completed")
+                .accessibilityHint("Double tap to toggle completion status")
+                .accessibilityAddTraits(.isButton)
             }
-            .accessibilityLabel(task.isCompleted ? "Task completed" : "Mark task as completed")
-            .accessibilityHint("Double tap to toggle completion status")
-            .accessibilityAddTraits(.isButton)
         }
         .padding()
         .background(

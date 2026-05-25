@@ -106,7 +106,7 @@ struct MainTabView: View {
                     HomeView()
                         .tag(0)
                     
-                    HeatmapCalendarView(taskViewModel: TaskViewModel())
+                    HeatmapCalendarView(taskViewModel: taskViewModel)
                         .tag(1)
                     
                     InsightsView()
@@ -127,7 +127,7 @@ struct MainTabView: View {
                     }
                     .tag(0)
                 
-                HeatmapCalendarView(taskViewModel: TaskViewModel())
+                HeatmapCalendarView(taskViewModel: taskViewModel)
                     .tabItem {
                         Image(systemName: "calendar")
                         Text("Heatmap")

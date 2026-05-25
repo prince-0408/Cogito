@@ -271,7 +271,18 @@ struct TasksForDateView: View {
                         ScrollView {
                             VStack(spacing: 15) {
                                 ForEach(tasksForDate) { task in
-                                    TaskCard(task: task)
+                                    TaskCard(task: task) {
+                                        withAnimation {
+                                            if task.isCompleted {
+                                                var updatedTask = task
+                                                updatedTask.isCompleted = false
+                                                updatedTask.completedDate = nil
+                                                taskViewModel.updateTask(updatedTask)
+                                            } else {
+                                                taskViewModel.markTaskAsCompleted(task)
+                                            }
+                                        }
+                                    }
                                 }
                             }
                             .padding(.horizontal)

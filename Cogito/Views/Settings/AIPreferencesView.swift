@@ -10,6 +10,8 @@ import SwiftUI
 
 struct AIPreferencesView: View {
     @EnvironmentObject private var aiViewModel: AIViewModel
+    @AppStorage("mistralApiKey") private var mistralApiKey: String = ""
+    @State private var showApiKey: Bool = false
     
     var body: some View {
         ZStack {
@@ -75,6 +77,59 @@ struct AIPreferencesView: View {
                             }
                             .padding(.horizontal)
                         }
+                    }
+                    .padding(.horizontal)
+                    
+                    // API Configuration Section
+                    VStack(alignment: .leading, spacing: 15) {
+                        Text("API Configuration")
+                            .font(.headline)
+                            .foregroundColor(Color("TextPrimary"))
+                        
+                        VStack(alignment: .leading, spacing: 15) {
+                            Text("Mistral AI API Key")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(Color("Foreground"))
+                            
+                            HStack {
+                                if showApiKey {
+                                    TextField("Enter your API Key", text: $mistralApiKey)
+                                        .font(.system(.body, design: .monospaced))
+                                        .autocapitalization(.none)
+                                        .disableAutocorrection(true)
+                                } else {
+                                    SecureField("Enter your API Key", text: $mistralApiKey)
+                                        .font(.system(.body, design: .monospaced))
+                                        .autocapitalization(.none)
+                                        .disableAutocorrection(true)
+                                }
+                                
+                                Button(action: {
+                                    showApiKey.toggle()
+                                    let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                                    impactFeedback.impactOccurred()
+                                }) {
+                                    Image(systemName: showApiKey ? "eye.slash" : "eye")
+                                        .foregroundColor(Color("Primary"))
+                                }
+                            }
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color("Background"))
+                            )
+                            
+                            Text("Leave empty to use the built-in demo key. Get a key at console.mistral.ai.")
+                                .font(.caption)
+                                .foregroundColor(Color("TextPrimary").opacity(0.7))
+                        }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color("CardBackground"))
+                                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
+                        )
                     }
                     .padding(.horizontal)
                     
