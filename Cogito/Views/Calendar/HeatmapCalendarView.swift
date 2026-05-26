@@ -402,6 +402,10 @@ struct DayCell: View {
             .frame(height: 44)
         }
         .buttonStyle(PlainButtonStyle())
+        .accessibilityLabel(day.date.formatted(.dateTime.day().month(.wide).year()))
+        .accessibilityValue(hasTasks ? "\(day.completedCount) completed out of \(day.taskCount) tasks. Completion rate \(Int(completionRate * 100))%." : "No tasks scheduled.")
+        .accessibilityHint("Double tap to select and display the focus dashboard for this date.")
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : [.isButton])
     }
 }
 

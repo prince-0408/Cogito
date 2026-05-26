@@ -61,12 +61,18 @@ class AIViewModel: ObservableObject {
         errorMessage = nil
         currentRetryCount = 0
         
+        // Start continuous sensory hum loops
+        HapticManager.shared.startAICognitiveHum()
+        
         mistralAIService.generateInsights(from: tasks)
             .receive(on: DispatchQueue.main)
             .sink(
                 receiveCompletion: { [weak self] completion in
                     guard let self = self else { return }
                     self.isProcessing = false
+                    
+                    // Stop continuous hum loops on completion
+                    HapticManager.shared.stopAICognitiveHum()
                     
                     if case .failure(let error) = completion {
                         self.handleError(error, context: "generating insights")
@@ -75,6 +81,9 @@ class AIViewModel: ObservableObject {
                     }
                 },
                 receiveValue: { [weak self] insights in
+                    // Stop continuous hum loops on completion
+                    HapticManager.shared.stopAICognitiveHum()
+                    
                     if insights.isEmpty {
                         // If API returned empty results, use simulated insights
                         self?.insights = AIInsight.generateInsights(from: tasks)

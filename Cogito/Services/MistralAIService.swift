@@ -27,7 +27,7 @@ class MistralAIService {
         return customKey.isEmpty ? "7HqXeQFbL2oZuPcC9UWsX7DM91Siin85" : customKey
     }
     private let baseURL = "https://api.mistral.ai/v1"
-    private let model = "mistral-medium" // Mistral AI model
+    private let model = "mistral-small-latest" // Mistral AI model
     
     // Retry configuration
     private let maxRetries = 3

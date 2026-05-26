@@ -10,6 +10,9 @@ struct SettingsView: View {
     @State private var showingNotificationPermission = false
     @State private var notificationStatus: UNAuthorizationStatus = .notDetermined
     @State private var showingThemeSelector = false
+    @State private var versionTapCount = 0
+    @State private var showDeveloperOptions = false
+
     
     var body: some View {
         NavigationView {
@@ -59,6 +62,20 @@ struct SettingsView: View {
                                 .font(.caption)
                                 .foregroundColor(Color("TextPrimary").opacity(0.7))
                                 .padding(.top, 5)
+                                .onTapGesture {
+                                    versionTapCount += 1
+                                    if versionTapCount >= 7 {
+                                        if !showDeveloperOptions {
+                                            withAnimation(.spring()) {
+                                                showDeveloperOptions = true
+                                            }
+                                            HapticManager.shared.playConfettiSparkles()
+                                        }
+                                    } else {
+                                        let impact = UIImpactFeedbackGenerator(style: .light)
+                                        impact.impactOccurred()
+                                    }
+                                }
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 30)
@@ -222,16 +239,6 @@ struct SettingsView: View {
                                     hasNavigation: false
                                 )
                             }
-                            
-                            Button(action: {
-                                hasCompletedOnboarding = false
-                            }) {
-                                SettingsRow(
-                                    title: "Show Onboarding",
-                                    icon: "arrow.clockwise",
-                                    hasNavigation: false
-                                )
-                            }
                         }
                         
                         // About
@@ -263,6 +270,38 @@ struct SettingsView: View {
                                     hasNavigation: true
                                 )
                             }
+                        }
+                        
+                        if showDeveloperOptions {
+                            SettingsSection(
+                                title: "Developer Options 🛠️",
+                                icon: "hammer.fill",
+                                iconColor: .orange
+                            ) {
+                                Button(action: {
+                                    hasCompletedOnboarding = false
+                                }) {
+                                    SettingsRow(
+                                        title: "Reset Onboarding State",
+                                        icon: "arrow.clockwise",
+                                        iconColor: .orange,
+                                        hasNavigation: false
+                                    )
+                                }
+                                
+                                Button(action: {
+                                    taskViewModel.taskDataService?.deleteAllTasks()
+                                    HapticManager.shared.playCompletedTaskHaptic()
+                                }) {
+                                    SettingsRow(
+                                        title: "Clear All Current Tasks",
+                                        icon: "trash.fill",
+                                        iconColor: .red,
+                                        hasNavigation: false
+                                    )
+                                }
+                            }
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
                         }
                     }
                     .padding(.vertical)

@@ -127,9 +127,8 @@ struct CelebrationView: View {
                     opacity = 1.0
                 }
                 
-                // Success Haptic Feedback sequence
-                let generator = UINotificationFeedbackGenerator()
-                generator.notificationOccurred(.success)
+                // Play premium scattered haptic sparkles matching confetti falling physics:
+                HapticManager.shared.playConfettiSparkles()
                 
                 // Non-intrusive Auto-Dismiss (Extended to 4s to allow reading)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {

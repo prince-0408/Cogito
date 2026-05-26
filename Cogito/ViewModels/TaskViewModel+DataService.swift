@@ -74,6 +74,9 @@ extension TaskViewModel {
     }
     
     func markTaskAsCompleted(_ task: Task) {
+        // Play premium transient feedback immediately
+        HapticManager.shared.playCompletedTaskHaptic()
+        
         if let dataService = taskDataService {
             var updatedTask = task
             updatedTask.isCompleted = true

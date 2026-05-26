@@ -42,29 +42,31 @@ struct InsightsView: View {
                                 
                                 if aiViewModel.isProcessing {
                                     ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle(tint: Color("Primary")))
+                                        .progressViewStyle(CircularProgressViewStyle(tint: themeManager.currentTheme.color))
                                 }
                             }
                             
                             if aiViewModel.isProcessing {
-                                HStack {
-                                    Spacer()
-                                    VStack(spacing: 15) {
-                                        LottieAnimationView(name: "loading")
-                                            .frame(width: 120, height: 120)
-                                        
-                                        Text("Analyzing your tasks...")
-                                            .font(.subheadline)
-                                            .foregroundColor(Color("TextPrimary").opacity(0.7))
+                                VStack(spacing: 14) {
+                                    HStack {
+                                        Spacer()
+                                        VStack(spacing: 8) {
+                                            Text("🧠 Cogito AI is actively analyzing...")
+                                                .font(.system(size: 14, weight: .bold, design: .rounded))
+                                                .foregroundColor(themeManager.currentTheme.color)
+                                            
+                                            Text("Scanning completion rates and task priority distribution.")
+                                                .font(.system(size: 11))
+                                                .foregroundColor(Color("TextPrimary").opacity(0.6))
+                                        }
+                                        Spacer()
                                     }
-                                    Spacer()
+                                    .padding(.vertical, 6)
+                                    
+                                    ShimmerCard()
+                                    ShimmerCard()
                                 }
-                                .padding()
-                                .background(
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .fill(Color("CardBackground"))
-                                        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
-                                )
+                                .transition(.opacity)
                             } else if aiViewModel.insights.isEmpty {
                                 Button(action: {
                                     aiViewModel.generateInsights(from: taskViewModel.tasks)
@@ -160,6 +162,9 @@ struct InsightsView: View {
                                     }
                                     .chartForegroundStyleScale(domain: categoryData.map { $0.category }, range: categoryData.map { getCategoryColor($0.category) })
                                     .animation(.spring(response: 0.3, dampingFraction: 0.75), value: selectedCategoryName)
+                                    .accessibilityLabel("Task completion by category donut chart")
+                                    .accessibilityValue(selectedCategoryName != nil ? "Currently highlighting \(selectedCategoryName ?? "") category with \(categoryData.first(where: { $0.category == selectedCategoryName })?.count ?? 0) tasks." : "Total tasks: \(categoryData.reduce(0) { $0 + $1.count }).")
+                                    .accessibilityElement(children: .ignore)
                                     
                                     // Center circle with dynamic total count
                                     VStack {
@@ -230,6 +235,10 @@ struct InsightsView: View {
                                             )
                                         }
                                         .buttonStyle(PlainButtonStyle())
+                                        .accessibilityLabel("\(item.category.capitalized) category")
+                                        .accessibilityValue("\(item.count) tasks")
+                                        .accessibilityHint(isHighlighted ? "Double tap to clear the filter." : "Double tap to highlight the \(item.category.capitalized) slice inside the donut chart.")
+                                        .accessibilityAddTraits(isHighlighted ? [.isButton, .isSelected] : [.isButton])
                                     }
                                 }
                                 .padding()
@@ -290,68 +299,72 @@ struct InsightsView: View {
                                 )
                             } else {
                                 Chart {
-                                    ForEach(trendData) { item in
-                                        LineMark(
-                                            x: .value("Date", item.date),
-                                            y: .value("Completed", getCompletedCount(for: item.completed))
-                                        )
-                                        .foregroundStyle(themeManager.currentTheme.color)
-                                        .interpolationMethod(.catmullRom)
-                                    }
-                                    
-                                    ForEach(trendData) { item in
-                                        AreaMark(
-                                            x: .value("Date", item.date),
-                                            y: .value("Completed", getCompletedCount(for: item.completed))
-                                        )
-                                        .foregroundStyle(themeManager.currentTheme.color.opacity(0.18))
-                                        .interpolationMethod(.catmullRom)
-                                    }
-                                    
-                                    ForEach(trendData) { item in
-                                        PointMark(
-                                            x: .value("Date", item.date),
-                                            y: .value("Completed", getCompletedCount(for: item.completed))
-                                        )
-                                        .foregroundStyle(themeManager.currentTheme.color)
-                                        .opacity(getPointMarkOpacity())
-                                    }
-                                    
-                                    // Interactive scrubber markings
-                                    if let scrubberDate = activeScrubberDate {
-                                        RuleMark(
-                                            x: .value("Selected Date", scrubberDate)
-                                        )
-                                        .foregroundStyle(themeManager.currentTheme.color.opacity(0.35))
-                                        .lineStyle(StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [3, 3]))
-                                    }
-                                    
-                                    if let scrubberDate = activeScrubberDate, let scrubberValue = activeScrubberValue {
-                                        // Outer border circle
-                                        PointMark(
-                                            x: .value("Selected Date", scrubberDate),
-                                            y: .value("Selected Value", scrubberValue)
-                                        )
-                                        .foregroundStyle(themeManager.currentTheme.color)
-                                        .symbolSize(180)
-                                        
-                                        // Inner white fill circle
-                                        PointMark(
-                                            x: .value("Selected Date", scrubberDate),
-                                            y: .value("Selected Value", scrubberValue)
-                                        )
-                                        .foregroundStyle(.white)
-                                        .symbolSize(70)
-                                    }
-                                }
-                                .frame(height: 200)
-                                .chartXAxis {
-                                    AxisMarks(values: .stride(by: .day, count: 2)) { _ in
-                                        AxisGridLine()
-                                        AxisTick()
-                                        AxisValueLabel(format: .dateTime.day().month())
-                                    }
-                                }
+                                            ForEach(trendData) { item in
+                                                LineMark(
+                                                    x: .value("Date", item.date),
+                                                    y: .value("Completed", getCompletedCount(for: item.completed))
+                                                )
+                                                .foregroundStyle(themeManager.currentTheme.color)
+                                                .interpolationMethod(.catmullRom)
+                                            }
+                                            
+                                            ForEach(trendData) { item in
+                                                AreaMark(
+                                                    x: .value("Date", item.date),
+                                                    y: .value("Completed", getCompletedCount(for: item.completed))
+                                                )
+                                                .foregroundStyle(themeManager.currentTheme.color.opacity(0.18))
+                                                .interpolationMethod(.catmullRom)
+                                            }
+                                            
+                                            ForEach(trendData) { item in
+                                                PointMark(
+                                                    x: .value("Date", item.date),
+                                                    y: .value("Completed", getCompletedCount(for: item.completed))
+                                                )
+                                                .foregroundStyle(themeManager.currentTheme.color)
+                                                .opacity(getPointMarkOpacity())
+                                            }
+                                            
+                                            // Interactive scrubber markings
+                                            if let scrubberDate = activeScrubberDate {
+                                                RuleMark(
+                                                    x: .value("Selected Date", scrubberDate)
+                                                )
+                                                .foregroundStyle(themeManager.currentTheme.color.opacity(0.35))
+                                                .lineStyle(StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [3, 3]))
+                                            }
+                                            
+                                            if let scrubberDate = activeScrubberDate, let scrubberValue = activeScrubberValue {
+                                                // Outer border circle
+                                                PointMark(
+                                                    x: .value("Selected Date", scrubberDate),
+                                                    y: .value("Selected Value", scrubberValue)
+                                                )
+                                                .foregroundStyle(themeManager.currentTheme.color)
+                                                .symbolSize(180)
+                                                
+                                                // Inner white fill circle
+                                                PointMark(
+                                                    x: .value("Selected Date", scrubberDate),
+                                                    y: .value("Selected Value", scrubberValue)
+                                                )
+                                                .foregroundStyle(.white)
+                                                .symbolSize(70)
+                                            }
+                                        }
+                                        .frame(height: 200)
+                                        .chartXAxis {
+                                            AxisMarks(values: .stride(by: .day, count: 2)) { _ in
+                                                AxisGridLine()
+                                                AxisTick()
+                                                AxisValueLabel(format: .dateTime.day().month())
+                                            }
+                                        }
+                                        .accessibilityLabel("Task completion trend line graph")
+                                        .accessibilityValue(activeScrubberDate != nil ? "Selected date \(activeScrubberDate?.formatted(.dateTime.day().month(.wide)) ?? ""), \(activeScrubberValue ?? 0) completed tasks." : "14-day productivity trend. Average completed tasks per day is \(String(format: "%.1f", Double(trendData.reduce(0) { $0 + $1.completed }) / 14.0)).")
+                                        .accessibilityHint("Drag across the graph to scrub and read specific date details.")
+                                        .accessibilityElement(children: .ignore)
                                 .chartOverlay { proxy in
                                     GeometryReader { geometry in
                                         Rectangle()
