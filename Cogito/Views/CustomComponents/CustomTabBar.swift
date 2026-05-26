@@ -2,6 +2,8 @@ import SwiftUI
 
 struct CustomTabBar: View {
     @Binding var selectedTab: Int
+    @EnvironmentObject private var themeManager: ThemeManager
+    
     let tabs = [
         TabItem(icon: "house.fill", title: "Home"),
         TabItem(icon: "calendar", title: "Heatmap"),
@@ -10,14 +12,16 @@ struct CustomTabBar: View {
     ]
     
     var body: some View {
-        HStack {
+        HStack(spacing: 0) {
             ForEach(0..<tabs.count, id: \.self) { index in
                 Spacer()
                 TabButton(
                     item: tabs[index],
                     isSelected: selectedTab == index,
+                    accentColor: themeManager.currentTheme.color,
+                    isDarkMode: themeManager.isDarkMode,
                     action: {
-                        withAnimation(.easeInOut(duration: 0.3)) {
+                        withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
                             selectedTab = index
                         }
                     }
@@ -25,20 +29,46 @@ struct CustomTabBar: View {
                 Spacer()
             }
         }
-        .padding(.vertical, 12)
+        .padding(.vertical, 10)
         .padding(.horizontal, 8)
-//        .background(
-//            Capsule()
-//                .fill(Color.black.opacity(0.2))
-//        )
-        .frame(height: 60)
-        .padding(.horizontal, 16)
-        .padding(.bottom, 16)
+        .background(
+            ZStack {
+                // Ultra Thin Glass Backdrop
+                Capsule()
+                    .fill(.ultraThinMaterial)
+                
+                // Colored Hue Underlay
+                Capsule()
+                    .fill(Color("CardBackground").opacity(0.45))
+            }
+        )
+        // High fidelity border gradient
+        .overlay(
+            Capsule()
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.65),
+                            Color.white.opacity(0.15),
+                            themeManager.currentTheme.color.opacity(0.02),
+                            themeManager.currentTheme.color.opacity(0.25)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1.2
+                )
+        )
+        // High depth premium shadow
+        .shadow(color: Color.black.opacity(0.08), radius: 15, x: 0, y: 6)
+        .shadow(color: themeManager.currentTheme.color.opacity(0.04), radius: 20, x: 0, y: 10)
+        .frame(height: 56)
+        .padding(.horizontal, 24)
         .background(Color.clear)
     }
 }
 
-struct TabItem {
+struct TabItem: Equatable {
     let icon: String
     let title: String
 }
@@ -46,33 +76,42 @@ struct TabItem {
 struct TabButton: View {
     let item: TabItem
     let isSelected: Bool
+    let accentColor: Color
+    let isDarkMode: Bool
     let action: () -> Void
     
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            let impact = UIImpactFeedbackGenerator(style: .light)
+            impact.impactOccurred()
+            action()
+        }) {
             HStack(spacing: 8) {
                 Image(systemName: item.icon)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(isSelected ? Color.blue : Color.gray.opacity(0.6))
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(isSelected ? accentColor : Color("TextPrimary").opacity(0.55))
+                    .shadow(color: isSelected ? accentColor.opacity(0.3) : .clear, radius: 4, x: 0, y: 2)
                 
                 if isSelected {
                     Text(item.title)
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(Color.blue)
-                        .transition(.opacity)
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundColor(accentColor)
+                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
                 }
             }
-            .padding(.horizontal, isSelected ? 16 : 0)
-            .padding(.vertical, 10)
-            .background(isSelected ? Color.white.opacity(0.1) : Color.clear)
+            .padding(.horizontal, isSelected ? 16 : 12)
+            .padding(.vertical, 8)
+            .background(
+                isSelected ? 
+                accentColor.opacity(isDarkMode ? 0.16 : 0.08) : 
+                Color.clear
+            )
             .clipShape(Capsule())
-            .animation(.easeInOut(duration: 0.3), value: isSelected)
         }
+        .buttonStyle(PlainButtonStyle())
+        .animation(.spring(response: 0.3, dampingFraction: 0.75), value: isSelected)
+        .accessibilityLabel("\(item.title) tab")
+        .accessibilityHint(isSelected ? "Currently selected tab" : "Double tap to switch to \(item.title) tab")
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 }
-#Preview {
-    CustomTabBar(selectedTab: .constant(0))
-        .preferredColorScheme(.light)
-}
-
-
