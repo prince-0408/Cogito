@@ -1,11 +1,11 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @AppStorage("isDarkMode") private var isDarkMode: Bool = false
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = true
-    @AppStorage("appTheme") private var appTheme: String = "blue"
+    @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var aiViewModel: AIViewModel
     @EnvironmentObject private var taskViewModel: TaskViewModel
+    @EnvironmentObject private var tutorialManager: TutorialManager
     @State private var showingResetConfirmation = false
     @State private var showingNotificationPermission = false
     @State private var notificationStatus: UNAuthorizationStatus = .notDetermined
@@ -91,7 +91,10 @@ struct SettingsView: View {
                             ToggleSetting(
                                 title: "Dark Mode",
                                 icon: "moon.fill",
-                                isOn: $isDarkMode
+                                isOn: Binding(
+                                    get: { themeManager.isDarkMode },
+                                    set: { themeManager.setDarkMode($0) }
+                                )
                             )
                             
                             Button(action: {
@@ -103,9 +106,21 @@ struct SettingsView: View {
                                     hasNavigation: true,
                                     trailingContent: {
                                         Circle()
-                                            .fill(getThemeColor())
+                                            .fill(themeManager.currentTheme.color)
                                             .frame(width: 20, height: 20)
                                     }
+                                )
+                            }
+                            
+                            Button(action: {
+                                tutorialManager.startTutorial()
+                                NotificationCenter.default.post(name: NSNotification.Name("SwitchToHomeTab"), object: nil)
+                            }) {
+                                SettingsRow(
+                                    title: "Restart Feature Tour",
+                                    icon: "sparkles",
+                                    iconColor: .purple,
+                                    hasNavigation: false
                                 )
                             }
                         }
@@ -279,7 +294,7 @@ struct SettingsView: View {
                 )
             }
             .modernSheet(isPresented: $showingThemeSelector, title: "Choose Theme") {
-                ThemeSelectionView(appTheme: $appTheme, isDarkMode: $isDarkMode)
+                ThemeSelectionView()
             }
             .onAppear {
                 checkNotificationStatus()
@@ -290,21 +305,6 @@ struct SettingsView: View {
     private func checkNotificationStatus() {
         NotificationManager.shared.checkAuthorizationStatus { status in
             self.notificationStatus = status
-        }
-    }
-    
-    private func getThemeColor() -> Color {
-        switch appTheme {
-        case "blue":
-            return .blue
-        case "green":
-            return .green
-        case "purple":
-            return .purple
-        case "orange":
-            return .orange
-        default:
-            return .blue
         }
     }
 }

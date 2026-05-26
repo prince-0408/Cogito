@@ -7,42 +7,38 @@
 import SwiftUI
 
 struct ThemeSelectionView: View {
-    @Binding var appTheme: String
-    @Binding var isDarkMode: Bool
-
-    let themes = [
-        ("Blue", Color.blue),
-        ("Green", Color.green),
-        ("Purple", Color.purple),
-        ("Orange", Color.orange),
-        ("Red", Color.red)
-    ]
+    @EnvironmentObject private var themeManager: ThemeManager
 
     var body: some View {
         VStack(spacing: 15) {
-            ForEach(themes, id: \.0) { theme in
+            ForEach(AppTheme.allCases) { theme in
                 ThemeButton(
-                    title: theme.0,
-                    color: theme.1,
-                    isSelected: appTheme == theme.0.lowercased(),
-                    action: { appTheme = theme.0.lowercased() }
+                    title: theme.displayName,
+                    color: theme.color,
+                    isSelected: themeManager.currentTheme == theme,
+                    action: {
+                        themeManager.setTheme(theme)
+                    }
                 )
             }
             
-            Toggle(isOn: $isDarkMode) {
-                Label("Dark Mode", systemImage: isDarkMode ? "moon.fill" : "sun.max.fill")
+            Toggle(isOn: Binding(
+                get: { themeManager.isDarkMode },
+                set: { themeManager.setDarkMode($0) }
+            )) {
+                Label("Dark Mode", systemImage: themeManager.isDarkMode ? "moon.fill" : "sun.max.fill")
+                    .foregroundColor(.primary)
             }
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 12)
                     .fill(Color.primary.opacity(0.1))
             )
-            .toggleStyle(SwitchToggleStyle(tint: .orange))
+            .toggleStyle(SwitchToggleStyle(tint: themeManager.currentTheme.color))
         }
         .padding(.horizontal, 40)
     }
 }
-
 
 struct ThemeButton: View {
     let title: String
@@ -71,8 +67,9 @@ struct ThemeButton: View {
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(color.opacity(0.2))
+                    .fill(color.opacity(isSelected ? 0.25 : 0.1))
             )
         }
+        .buttonStyle(PlainButtonStyle())
     }
 }

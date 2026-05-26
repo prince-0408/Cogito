@@ -3,6 +3,7 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject private var taskViewModel: TaskViewModel
     @EnvironmentObject private var aiViewModel: AIViewModel
+    @EnvironmentObject private var tutorialManager: TutorialManager
     @State private var showingNewTaskSheet = false
     @State private var showingTaskDetail: Task?
     @State private var selectedCategory: TaskCategory?
@@ -10,11 +11,38 @@ struct HomeView: View {
     @State private var isEditMode = false
     @State private var showCelebration = false
     @State private var currentAchievement: AchievementType = .firstTask
+    @State private var spotlightRects: [String: CGRect] = [:]
     
     private var displayedTasks: [Task] {
-        taskViewModel.filteredTasks.filter {
+        let tasks = taskViewModel.filteredTasks.filter {
             selectedCategory == nil || $0.category == selectedCategory
         }
+        if tasks.isEmpty && tutorialManager.isTutorialActive {
+            return [
+                Task(
+                    title: "🎯 Complete Cogito Interactive Feature Tour",
+                    category: .education,
+                    priority: .urgent,
+                    dueDate: Date()
+                )
+            ]
+        }
+        return tasks
+    }
+    
+    private var displayedSuggestions: [AITaskSuggestion] {
+        if aiViewModel.taskSuggestions.isEmpty && tutorialManager.isTutorialActive {
+            return [
+                AITaskSuggestion(
+                    title: "Organize desk for deep focus session",
+                    category: .work,
+                    priority: .medium,
+                    dueDate: Date(),
+                    confidence: 0.95
+                )
+            ]
+        }
+        return aiViewModel.taskSuggestions
     }
     
     var body: some View {
@@ -77,6 +105,7 @@ struct HomeView: View {
                                                 .fill(Color("Primary").opacity(0.2))
                                         )
                                 }
+                                .spotlight(id: "create_button")
                                 .accessibilityLabel("Create new task")
                                 .accessibilityHint("Opens the task creation screen")
                                 .accessibilityAddTraits(.isButton)
@@ -85,7 +114,7 @@ struct HomeView: View {
                         .padding(.horizontal)
                         
                         // AI Suggestions
-                        if aiViewModel.isEnabled && !aiViewModel.taskSuggestions.isEmpty {
+                        if (aiViewModel.isEnabled && !aiViewModel.taskSuggestions.isEmpty) || tutorialManager.isTutorialActive {
                             VStack(alignment: .leading, spacing: 10) {
                                 Text("AI Suggestions")
                                     .font(.headline)
@@ -94,7 +123,7 @@ struct HomeView: View {
                                 
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack(spacing: 15) {
-                                        ForEach(aiViewModel.taskSuggestions) { suggestion in
+                                        ForEach(displayedSuggestions) { suggestion in
                                             SuggestionCard(suggestion: suggestion) {
                                                 let task = Task(
                                                     title: suggestion.title,
@@ -109,6 +138,7 @@ struct HomeView: View {
                                     .padding(.horizontal)
                                 }
                             }
+                            .spotlight(id: "ai_suggestions")
                         }
                         
                         // Category Filter
@@ -134,6 +164,7 @@ struct HomeView: View {
                             }
                             .padding(.horizontal)
                         }
+                        .spotlight(id: "category_filters")
                         
                         // Tasks List
                         VStack(alignment: .leading, spacing: 15) {
@@ -153,9 +184,51 @@ struct HomeView: View {
                             }
                         }
                         .padding(.horizontal)
+                        .spotlight(id: "task_list")
                     }
                     .padding(.vertical)
                 }
+                
+                // Tutorial Spotlight Overlay
+                if tutorialManager.isTutorialActive, let currentStep = tutorialManager.currentStep {
+                    let rect = spotlightRects[currentStep.id] ?? .zero
+                    
+                    ZStack(alignment: .topLeading) {
+                        // Dimmed overlay background with dynamic Even-Odd spotlight mask cutout
+                        Color.black.opacity(0.65)
+                            .mask(
+                                SpotlightMask(rect: rect, cornerRadius: 16)
+                                    .fill(style: FillStyle(eoFill: true))
+                            )
+                            .ignoresSafeArea()
+                            .onTapGesture {
+                                // Tap outside target to proceed
+                                tutorialManager.nextStep()
+                            }
+                        
+                        // Highlight overlay helper to allow interactions or outlines
+                        if rect != .zero {
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.white.opacity(0.8), lineWidth: 2.5)
+                                .frame(width: rect.width, height: rect.height)
+                                .position(x: rect.midX, y: rect.midY)
+                                .ignoresSafeArea()
+                            
+                            // Popover tooltip card positioned exactly relative to target center using absolute coordinates
+                            TutorialTooltipView(step: currentStep, spotlightRect: rect)
+                                .transition(.opacity.combined(with: .scale(scale: 0.94)))
+                                .position(x: calculateTooltipCenterX(rect: rect), y: calculateTooltipCenterY(rect: rect, step: currentStep))
+                                .animation(.spring(response: 0.4, dampingFraction: 0.8), value: tutorialManager.currentStepIndex)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .ignoresSafeArea()
+                    .zIndex(200)
+                    .transition(.opacity)
+                }
+            }
+            .onPreferenceChange(SpotlightPreferenceKey.self) { rects in
+                self.spotlightRects = rects
             }
             .overlay(
                 CelebrationView(isPresented: $showCelebration, achievementType: currentAchievement)
@@ -226,6 +299,32 @@ struct HomeView: View {
             if !isEditMode {
                 showingTaskDetail = task
             }
+        }
+    }
+    
+    // Tooltip horizontal centering coordinate mathematics using absolute positioning
+    private func calculateTooltipCenterX(rect: CGRect) -> CGFloat {
+        let screenWidth = UIScreen.main.bounds.width
+        let tooltipWidth: CGFloat = 300
+        
+        let targetX = rect.midX
+        let proposedTooltipX = targetX - (tooltipWidth / 2)
+        
+        let margin: CGFloat = 16
+        return max(margin, min(screenWidth - tooltipWidth - margin, proposedTooltipX)) + (tooltipWidth / 2)
+    }
+    
+    // Tooltip vertical alignment coordinate mathematics using absolute positioning
+    private func calculateTooltipCenterY(rect: CGRect, step: TutorialStep) -> CGFloat {
+        let caretPadding: CGFloat = 12
+        let tooltipHeightEstimate: CGFloat = 185
+        
+        if step.arrowDirection == .up {
+            // Below target: tooltip center Y is target bottom + half of tooltip height + padding
+            return rect.maxY + (tooltipHeightEstimate / 2) + caretPadding
+        } else {
+            // Above target: tooltip center Y is target top - half of tooltip height - padding
+            return rect.minY - (tooltipHeightEstimate / 2) - caretPadding
         }
     }
 }

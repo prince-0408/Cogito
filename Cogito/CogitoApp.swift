@@ -13,9 +13,9 @@ struct CogitoApp: App {
     
     @StateObject private var taskViewModel = TaskViewModel()
     @StateObject private var aiViewModel = AIViewModel()
+    @StateObject private var themeManager = ThemeManager()
+    @StateObject private var tutorialManager = TutorialManager()
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
-    @AppStorage("isDarkMode") private var isDarkMode: Bool = false
-    @AppStorage("appTheme") private var appTheme: String = "blue"
     
     init() {
         // Setup dependencies
@@ -24,6 +24,8 @@ struct CogitoApp: App {
         // Pre-assign the StateObjects
         _taskViewModel = StateObject(wrappedValue: taskVM)
         _aiViewModel = StateObject(wrappedValue: aiVM)
+        _themeManager = StateObject(wrappedValue: ThemeManager())
+        _tutorialManager = StateObject(wrappedValue: TutorialManager())
     }
     
     var body: some Scene {
@@ -32,8 +34,10 @@ struct CogitoApp: App {
                 MainTabView()
                     .environmentObject(taskViewModel)
                     .environmentObject(aiViewModel)
-                    .preferredColorScheme(isDarkMode ? .dark : .light)
-                    .accentColor(getThemeColor())
+                    .environmentObject(themeManager)
+                    .environmentObject(tutorialManager)
+                    .preferredColorScheme(themeManager.isDarkMode ? .dark : .light)
+                    .accentColor(themeManager.currentTheme.color)
                     .onAppear {
                         // Request notification permissions when app launches
                         NotificationManager.shared.requestAuthorization { _ in }
@@ -67,24 +71,11 @@ struct CogitoApp: App {
                     }
             } else {
                 OnboardingView()
-                    .preferredColorScheme(isDarkMode ? .dark : .light)
-                    .accentColor(getThemeColor())
+                    .environmentObject(themeManager)
+                    .environmentObject(tutorialManager)
+                    .preferredColorScheme(themeManager.isDarkMode ? .dark : .light)
+                    .accentColor(themeManager.currentTheme.color)
             }
-        }
-    }
-    
-    func getThemeColor() -> Color {
-        switch appTheme {
-        case "blue":
-            return .blue
-        case "green":
-            return .green
-        case "purple":
-            return .purple
-        case "orange":
-            return .orange
-        default:
-            return .blue
         }
     }
 }
@@ -97,56 +88,63 @@ struct MainTabView: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     
     var body: some View {
-        if horizontalSizeClass == .regular {
-            // iPad layout with sidebar
-            NavigationSplitView {
-                SidebarView(selectedTab: $selectedTab)
-            } detail: {
+        Group {
+            if horizontalSizeClass == .regular {
+                // iPad layout with sidebar
+                NavigationSplitView {
+                    SidebarView(selectedTab: $selectedTab)
+                } detail: {
+                    TabView(selection: $selectedTab) {
+                        HomeView()
+                            .tag(0)
+                        
+                        HeatmapCalendarView(taskViewModel: taskViewModel)
+                            .tag(1)
+                        
+                        InsightsView()
+                            .tag(2)
+                        
+                        SettingsView()
+                            .tag(3)
+                    }
+                    .navigationSplitViewColumnWidth(min: 300, ideal: 400)
+                }
+            } else {
+                // iPhone layout with tab bar
                 TabView(selection: $selectedTab) {
                     HomeView()
+                        .tabItem {
+                            Image(systemName: "house.fill")
+                            Text("Home")
+                        }
                         .tag(0)
                     
                     HeatmapCalendarView(taskViewModel: taskViewModel)
+                        .tabItem {
+                            Image(systemName: "calendar")
+                            Text("Heatmap")
+                        }
                         .tag(1)
                     
                     InsightsView()
+                        .tabItem {
+                            Image(systemName: "chart.bar.fill")
+                            Text("Insights")
+                        }
                         .tag(2)
                     
                     SettingsView()
+                        .tabItem {
+                            Image(systemName: "gearshape.fill")
+                            Text("Settings")
+                        }
                         .tag(3)
                 }
-                .navigationSplitViewColumnWidth(min: 300, ideal: 400)
             }
-        } else {
-            // iPhone layout with tab bar
-            TabView(selection: $selectedTab) {
-                HomeView()
-                    .tabItem {
-                        Image(systemName: "house.fill")
-                        Text("Home")
-                    }
-                    .tag(0)
-                
-                HeatmapCalendarView(taskViewModel: taskViewModel)
-                    .tabItem {
-                        Image(systemName: "calendar")
-                        Text("Heatmap")
-                    }
-                    .tag(1)
-                
-                InsightsView()
-                    .tabItem {
-                        Image(systemName: "chart.bar.fill")
-                        Text("Insights")
-                    }
-                    .tag(2)
-                
-                SettingsView()
-                    .tabItem {
-                        Image(systemName: "gearshape.fill")
-                        Text("Settings")
-                    }
-                    .tag(3)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("SwitchToHomeTab"))) { _ in
+            withAnimation(.easeInOut(duration: 0.35)) {
+                selectedTab = 0
             }
         }
     }

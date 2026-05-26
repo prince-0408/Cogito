@@ -4,8 +4,6 @@ struct OnboardingView: View {
     @State private var currentPage = 0
     @State private var progress: CGFloat = 0
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
-    @AppStorage("isDarkMode") private var isDarkMode: Bool = false
-    @AppStorage("appTheme") private var appTheme: String = "blue"
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
     let pages = [
@@ -70,7 +68,7 @@ struct OnboardingView: View {
                 TabView(selection: $currentPage) {
                     ForEach(0..<pages.count, id: \.self) { index in
                         if index == 3 { // Theme selection page
-                            ThemeSelectionView(appTheme: $appTheme, isDarkMode: $isDarkMode)
+                            ThemeSelectionView()
                                 .tag(index)
                         } else {
                             OnboardingPageView(
