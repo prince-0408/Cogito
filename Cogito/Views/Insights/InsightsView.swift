@@ -4,9 +4,15 @@ import Charts
 struct InsightsView: View {
     @EnvironmentObject private var taskViewModel: TaskViewModel
     @EnvironmentObject private var aiViewModel: AIViewModel
+    @EnvironmentObject private var themeManager: ThemeManager
     @State private var selectedInsight: AIInsight?
     @State private var showInsightDetail = false
     @State private var animateCharts = false
+    
+    // Interactive Graph Scrubber and Sector Highlights
+    @State private var selectedCategoryName: String? = nil
+    @State private var activeScrubberDate: Date? = nil
+    @State private var activeScrubberValue: Int? = nil
     
     var body: some View {
         NavigationView {
@@ -138,62 +144,99 @@ struct InsightsView: View {
                                         ForEach(categoryData, id: \.category) { item in
                                             SectorMark(
                                                 angle: .value("Count", animateCharts ? item.count : 0),
-                                                innerRadius: .ratio(0.5),
+                                                innerRadius: .ratio(getInnerRadiusRatio(for: item.category)),
+                                                outerRadius: .ratio(getOuterRadiusRatio(for: item.category)),
                                                 angularInset: 1.5
                                             )
                                             .foregroundStyle(by: .value("Category", item.category))
                                             .annotation(position: .overlay) {
                                                 Text("\(item.count)")
-                                                    .font(.caption)
+                                                    .font(.system(size: 11, weight: .bold, design: .rounded))
                                                     .foregroundColor(.white)
-                                                    .fontWeight(.bold)
-                                                    .opacity(animateCharts ? 1 : 0)
+                                                    .opacity(getAnnotationOpacity(for: item.category))
                                             }
+                                            .opacity(getSliceOpacity(for: item.category))
                                         }
                                     }
                                     .chartForegroundStyleScale(domain: categoryData.map { $0.category }, range: categoryData.map { getCategoryColor($0.category) })
+                                    .animation(.spring(response: 0.3, dampingFraction: 0.75), value: selectedCategoryName)
                                     
-                                    // Center circle with total count
+                                    // Center circle with dynamic total count
                                     VStack {
-                                        Text("\(categoryData.reduce(0) { $0 + $1.count })")
-                                            .font(.title2)
-                                            .fontWeight(.bold)
-                                            .foregroundColor(Color("Foreground"))
-                                        
-                                        Text("Total")
-                                            .font(.caption)
-                                            .foregroundColor(Color("TextPrimary"))
+                                        if let selectedCategory = selectedCategoryName,
+                                           let selectedItem = categoryData.first(where: { $0.category == selectedCategory }) {
+                                            Text("\(selectedItem.count)")
+                                                .font(.system(size: 28, weight: .bold, design: .rounded))
+                                                .foregroundColor(getCategoryColor(selectedCategory))
+                                                .transition(.scale.combined(with: .opacity))
+                                            
+                                            Text(selectedCategory.capitalized)
+                                                .font(.system(size: 10, weight: .bold, design: .rounded))
+                                                .foregroundColor(Color("TextPrimary").opacity(0.7))
+                                                .transition(.opacity)
+                                        } else {
+                                            Text("\(categoryData.reduce(0) { $0 + $1.count })")
+                                                .font(.system(size: 24, weight: .bold, design: .rounded))
+                                                .foregroundColor(Color("Foreground"))
+                                                .transition(.opacity)
+                                            
+                                            Text("Total")
+                                                .font(.system(size: 10, weight: .bold, design: .rounded))
+                                                .foregroundColor(Color("TextPrimary").opacity(0.7))
+                                                .transition(.opacity)
+                                        }
                                     }
+                                    .id(selectedCategoryName ?? "total")
                                     .opacity(animateCharts ? 1 : 0)
                                 }
                                 .frame(height: 250)
                                 .padding(.vertical)
                                 
-                                // Legend
-                                VStack(alignment: .leading, spacing: 12) {
+                                // Legend with interactive rows
+                                VStack(alignment: .leading, spacing: 10) {
                                     ForEach(categoryData, id: \.category) { item in
-                                        HStack {
-                                            Circle()
-                                                .fill(getCategoryColor(item.category))
-                                                .frame(width: 12, height: 12)
-                                            
-                                            Text(item.category)
-                                                .font(.subheadline)
-                                                .foregroundColor(Color("TextPrimary"))
-                                            
-                                            Spacer()
-                                            
-                                            Text("\(item.count) tasks")
-                                                .font(.subheadline)
-                                                .foregroundColor(Color("TextPrimary").opacity(0.7))
+                                        let isHighlighted = selectedCategoryName == item.category
+                                        Button(action: {
+                                            let impact = UIImpactFeedbackGenerator(style: .light)
+                                            impact.impactOccurred()
+                                            withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                                                if selectedCategoryName == item.category {
+                                                    selectedCategoryName = nil // Deselect
+                                                } else {
+                                                    selectedCategoryName = item.category
+                                                }
+                                            }
+                                        }) {
+                                            HStack {
+                                                Circle()
+                                                    .fill(getCategoryColor(item.category))
+                                                    .frame(width: 10, height: 10)
+                                                
+                                                Text(item.category.capitalized)
+                                                    .font(.system(size: 13, weight: isHighlighted ? .bold : .medium, design: .rounded))
+                                                    .foregroundColor(isHighlighted ? getCategoryColor(item.category) : Color("TextPrimary"))
+                                                
+                                                Spacer()
+                                                
+                                                Text("\(item.count) tasks")
+                                                    .font(.system(size: 13, weight: isHighlighted ? .bold : .medium, design: .rounded))
+                                                    .foregroundColor(isHighlighted ? getCategoryColor(item.category) : Color("TextPrimary").opacity(0.6))
+                                            }
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 8)
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 10)
+                                                    .fill(isHighlighted ? getCategoryColor(item.category).opacity(0.12) : Color.clear)
+                                            )
                                         }
+                                        .buttonStyle(PlainButtonStyle())
                                     }
                                 }
                                 .padding()
                                 .background(
                                     RoundedRectangle(cornerRadius: 16)
                                         .fill(Color("CardBackground"))
-                                        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                                        .shadow(color: Color.black.opacity(0.04), radius: 5, x: 0, y: 2)
                                 )
                             }
                         }
@@ -207,10 +250,35 @@ struct InsightsView: View {
                         
                         // Task Completion Trend
                         VStack(alignment: .leading, spacing: 15) {
-                            Text("Task Completion Trend")
-                                .font(.title3)
-                                .fontWeight(.bold)
-                                .foregroundColor(Color("Foreground"))
+                            HStack {
+                                if let date = activeScrubberDate, let value = activeScrubberValue {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Focus Scrubbing")
+                                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                                            .foregroundColor(themeManager.currentTheme.color)
+                                            .textCase(.uppercase)
+                                        
+                                        Text("\(date.formatted(.dateTime.day().month().year())): \(value) Completed")
+                                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                                            .foregroundColor(Color("Foreground"))
+                                    }
+                                    .transition(.opacity.combined(with: .move(edge: .top)))
+                                } else {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Task Completion Trend")
+                                            .font(.title3)
+                                            .fontWeight(.bold)
+                                            .foregroundColor(Color("Foreground"))
+                                        
+                                        Text("Complete tasks over time to see trends")
+                                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                                            .foregroundColor(Color("TextPrimary").opacity(0.55))
+                                    }
+                                    .transition(.opacity)
+                                }
+                                Spacer()
+                            }
+                            .animation(.spring(response: 0.25, dampingFraction: 0.8), value: activeScrubberDate != nil)
                             
                             let trendData = getTrendData()
                             
@@ -225,30 +293,55 @@ struct InsightsView: View {
                                     ForEach(trendData) { item in
                                         LineMark(
                                             x: .value("Date", item.date),
-                                            y: .value("Completed", animateCharts ? item.completed : 0)
+                                            y: .value("Completed", getCompletedCount(for: item.completed))
                                         )
-                                        .foregroundStyle(Color("Primary"))
+                                        .foregroundStyle(themeManager.currentTheme.color)
                                         .interpolationMethod(.catmullRom)
-                                        
+                                    }
+                                    
+                                    ForEach(trendData) { item in
                                         AreaMark(
                                             x: .value("Date", item.date),
-                                            y: .value("Completed", animateCharts ? item.completed : 0)
+                                            y: .value("Completed", getCompletedCount(for: item.completed))
                                         )
-                                        .foregroundStyle(
-                                            LinearGradient(
-                                                colors: [Color("Primary").opacity(0.5), Color("Primary").opacity(0.0)],
-                                                startPoint: .top,
-                                                endPoint: .bottom
-                                            )
-                                        )
+                                        .foregroundStyle(themeManager.currentTheme.color.opacity(0.18))
                                         .interpolationMethod(.catmullRom)
-                                        
+                                    }
+                                    
+                                    ForEach(trendData) { item in
                                         PointMark(
                                             x: .value("Date", item.date),
-                                            y: .value("Completed", animateCharts ? item.completed : 0)
+                                            y: .value("Completed", getCompletedCount(for: item.completed))
                                         )
-                                        .foregroundStyle(Color("Primary"))
-                                        .opacity(animateCharts ? 1 : 0)
+                                        .foregroundStyle(themeManager.currentTheme.color)
+                                        .opacity(getPointMarkOpacity())
+                                    }
+                                    
+                                    // Interactive scrubber markings
+                                    if let scrubberDate = activeScrubberDate {
+                                        RuleMark(
+                                            x: .value("Selected Date", scrubberDate)
+                                        )
+                                        .foregroundStyle(themeManager.currentTheme.color.opacity(0.35))
+                                        .lineStyle(StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [3, 3]))
+                                    }
+                                    
+                                    if let scrubberDate = activeScrubberDate, let scrubberValue = activeScrubberValue {
+                                        // Outer border circle
+                                        PointMark(
+                                            x: .value("Selected Date", scrubberDate),
+                                            y: .value("Selected Value", scrubberValue)
+                                        )
+                                        .foregroundStyle(themeManager.currentTheme.color)
+                                        .symbolSize(180)
+                                        
+                                        // Inner white fill circle
+                                        PointMark(
+                                            x: .value("Selected Date", scrubberDate),
+                                            y: .value("Selected Value", scrubberValue)
+                                        )
+                                        .foregroundStyle(.white)
+                                        .symbolSize(70)
                                     }
                                 }
                                 .frame(height: 200)
@@ -257,6 +350,40 @@ struct InsightsView: View {
                                         AxisGridLine()
                                         AxisTick()
                                         AxisValueLabel(format: .dateTime.day().month())
+                                    }
+                                }
+                                .chartOverlay { proxy in
+                                    GeometryReader { geometry in
+                                        Rectangle()
+                                            .fill(Color.clear)
+                                            .contentShape(Rectangle())
+                                            .gesture(
+                                                DragGesture(minimumDistance: 0)
+                                                    .onChanged { value in
+                                                        let location = value.location
+                                                        if let date: Date = proxy.value(atX: location.x) {
+                                                            // Find closest data point in trendData
+                                                            if let closestPoint = trendData.min(by: {
+                                                                abs($0.date.timeIntervalSince(date)) < abs($1.date.timeIntervalSince(date))
+                                                            }) {
+                                                                if activeScrubberDate != closestPoint.date {
+                                                                    let impact = UIImpactFeedbackGenerator(style: .light)
+                                                                    impact.impactOccurred()
+                                                                }
+                                                                withAnimation(.interactiveSpring(response: 0.15, dampingFraction: 0.8)) {
+                                                                    activeScrubberDate = closestPoint.date
+                                                                    activeScrubberValue = closestPoint.completed
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    .onEnded { _ in
+                                                        withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
+                                                            activeScrubberDate = nil
+                                                            activeScrubberValue = nil
+                                                        }
+                                                    }
+                                            )
                                     }
                                 }
                                 .padding(.vertical)
@@ -359,6 +486,34 @@ struct InsightsView: View {
             return category.color
         }
         return .gray
+    }
+    
+    private func getInnerRadiusRatio(for category: String) -> Double {
+        selectedCategoryName == category ? 0.42 : 0.5
+    }
+    
+    private func getOuterRadiusRatio(for category: String) -> Double {
+        selectedCategoryName == category ? 1.08 : 1.0
+    }
+    
+    private func getSliceOpacity(for category: String) -> Double {
+        selectedCategoryName == nil || selectedCategoryName == category ? 1.0 : 0.4
+    }
+    
+    private func getAnnotationOpacity(for category: String) -> Double {
+        selectedCategoryName == nil || selectedCategoryName == category ? 1.0 : 0.3
+    }
+    
+    private func getCompletedCount(for count: Int) -> Int {
+        animateCharts ? count : 0
+    }
+    
+    private func getScrubberIndicatorColor() -> Color {
+        themeManager.currentTheme.color
+    }
+    
+    private func getPointMarkOpacity() -> Double {
+        animateCharts && activeScrubberDate == nil ? 1.0 : 0.0
     }
     
     private func getTrendData() -> [TrendDataPoint] {
