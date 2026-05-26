@@ -94,49 +94,43 @@ struct MainTabView: View {
                 NavigationSplitView {
                     SidebarView(selectedTab: $selectedTab)
                 } detail: {
-                    TabView(selection: $selectedTab) {
+                    switch selectedTab {
+                    case 0:
                         HomeView()
-                            .tag(0)
-                        
+                    case 1:
                         HeatmapCalendarView(taskViewModel: taskViewModel)
-                            .tag(1)
-                        
+                    case 2:
                         InsightsView()
-                            .tag(2)
-                        
+                    case 3:
                         SettingsView()
-                            .tag(3)
+                    default:
+                        HomeView()
                     }
-                    .navigationSplitViewColumnWidth(min: 300, ideal: 400)
                 }
             } else {
-                // iPhone layout with tab bar
+                // iPhone layout with standard native system tab bar
                 TabView(selection: $selectedTab) {
                     HomeView()
                         .tabItem {
-                            Image(systemName: "house.fill")
-                            Text("Home")
+                            Label("Home", systemImage: "house.fill")
                         }
                         .tag(0)
                     
                     HeatmapCalendarView(taskViewModel: taskViewModel)
                         .tabItem {
-                            Image(systemName: "calendar")
-                            Text("Heatmap")
+                            Label("Heatmap", systemImage: "calendar")
                         }
                         .tag(1)
                     
                     InsightsView()
                         .tabItem {
-                            Image(systemName: "chart.bar.fill")
-                            Text("Insights")
+                            Label("Insights", systemImage: "chart.bar.fill")
                         }
                         .tag(2)
                     
                     SettingsView()
                         .tabItem {
-                            Image(systemName: "gearshape.fill")
-                            Text("Settings")
+                            Label("Settings", systemImage: "gearshape.fill")
                         }
                         .tag(3)
                 }

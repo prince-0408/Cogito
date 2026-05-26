@@ -4,6 +4,7 @@ import Charts
 struct HeatmapCalendarView: View {
     @EnvironmentObject private var taskViewModel: TaskViewModel
     @StateObject private var heatmapViewModel: HeatmapViewModel
+    @EnvironmentObject private var themeManager: ThemeManager
     @State private var selectedDay: DayData?
     @State private var showingTasksForDate: Date?
     
@@ -18,127 +19,287 @@ struct HeatmapCalendarView: View {
                 Color("Background")
                     .ignoresSafeArea()
                 
-                VStack(spacing: 20) {
-                    // Month selector
-                    HStack {
-                        Button(action: {
-                            heatmapViewModel.selectPreviousMonth()
-                        }) {
-                            Image(systemName: "chevron.left")
-                                .foregroundColor(Color("Primary"))
-                                .padding()
-                                .background(
-                                    Circle()
-                                        .fill(Color("CardBackground"))
-                                )
-                        }
-                        
-                        Spacer()
-                        
-                        if !heatmapViewModel.monthData.isEmpty {
-                            let monthDate = heatmapViewModel.monthData[heatmapViewModel.selectedMonthIndex].month
-                            Text(heatmapViewModel.getMonthName(for: monthDate))
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .foregroundColor(Color("Foreground"))
-                        }
-                        
-                        Spacer()
-                        
-                        Button(action: {
-                            heatmapViewModel.selectNextMonth()
-                        }) {
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(Color("Primary"))
-                                .padding()
-                                .background(
-                                    Circle()
-                                        .fill(Color("CardBackground"))
-                                )
-                        }
-                    }
-                    .padding(.horizontal)
-                    
-                    // Heatmap calendar
-                    if !heatmapViewModel.monthData.isEmpty {
-                        let days = heatmapViewModel.monthData[heatmapViewModel.selectedMonthIndex].days
-                        
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 7), spacing: 8) {
-                            // Day headers
-                            ForEach(["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], id: \.self) { day in
-                                Text(day)
-                                    .font(.caption)
-                                    .foregroundColor(Color("TextPrimary"))
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 24) {
+                        // Month selector
+                        HStack {
+                            Button(action: {
+                                let impact = UIImpactFeedbackGenerator(style: .medium)
+                                impact.impactOccurred()
+                                heatmapViewModel.selectPreviousMonth()
+                            }) {
+                                Image(systemName: "chevron.left")
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundColor(themeManager.currentTheme.color)
+                                    .frame(width: 36, height: 36)
+                                    .background(
+                                        Circle()
+                                            .fill(Color("CardBackground"))
+                                            .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+                                    )
                             }
                             
-                            // Calendar days
-                            ForEach(days) { day in
-                                DayCell(day: day, isSelected: selectedDay?.id == day.id) {
-                                    selectedDay = day
-                                    showingTasksForDate = day.date
-                                }
+                            Spacer()
+                            
+                            if !heatmapViewModel.monthData.isEmpty {
+                                let monthDate = heatmapViewModel.monthData[heatmapViewModel.selectedMonthIndex].month
+                                Text(heatmapViewModel.getMonthName(for: monthDate))
+                                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                                    .foregroundColor(Color("Foreground"))
+                            }
+                            
+                            Spacer()
+                            
+                            Button(action: {
+                                let impact = UIImpactFeedbackGenerator(style: .medium)
+                                impact.impactOccurred()
+                                heatmapViewModel.selectNextMonth()
+                            }) {
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundColor(themeManager.currentTheme.color)
+                                    .frame(width: 36, height: 36)
+                                    .background(
+                                        Circle()
+                                            .fill(Color("CardBackground"))
+                                            .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+                                    )
                             }
                         }
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(Color("CardBackground"))
-                                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
-                        )
                         .padding(.horizontal)
-                    }
-                    
-                    // Productivity insights
-                    VStack(alignment: .leading, spacing: 15) {
-                        Text("Productivity Insights")
-                            .font(.headline)
-                            .foregroundColor(Color("TextPrimary"))
                         
-                        // Productivity chart
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("Task Completion Rate")
-                                .font(.subheadline)
-                                .foregroundColor(Color("TextPrimary"))
+                        // Heatmap calendar
+                        if !heatmapViewModel.monthData.isEmpty {
+                            let days = heatmapViewModel.monthData[heatmapViewModel.selectedMonthIndex].days
                             
-                            Chart {
-                                ForEach(taskViewModel.calendarData.flatMap { $0.days }) { day in
-                                    if day.taskCount > 0 {
-                                        BarMark(
-                                            x: .value("Date", day.date, unit: .day),
-                                            y: .value("Completion Rate", day.intensity)
-                                        )
-                                        .foregroundStyle(
+                            // Calculate weekday offset for the first day of this month
+                            let paddingCount: Int = {
+                                guard let firstDay = days.first?.date else { return 0 }
+                                let weekday = Calendar.current.component(.weekday, from: firstDay)
+                                return weekday - 1 // 1 is Sunday, so if Sunday, 0 padding spaces
+                            }()
+                            
+                            VStack(spacing: 12) {
+                                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 7), spacing: 8) {
+                                    // Day headers
+                                    ForEach(["S", "M", "T", "W", "T", "F", "S"], id: \.self) { day in
+                                        Text(day)
+                                            .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                            .foregroundColor(Color("TextPrimary").opacity(0.5))
+                                            .frame(maxWidth: .infinity)
+                                    }
+                                    
+                                    // Padding days representing empty spaces of the previous month
+                                    ForEach(0..<paddingCount, id: \.self) { _ in
+                                        Color.clear
+                                            .frame(height: 44)
+                                    }
+                                    
+                                    // Calendar days of the month
+                                    ForEach(days) { day in
+                                        DayCell(
+                                            day: day,
+                                            isSelected: selectedDay?.id == day.id,
+                                            themeColor: themeManager.currentTheme.color,
+                                            isDarkMode: themeManager.isDarkMode
+                                        ) {
+                                            withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                                                selectedDay = day
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                Divider()
+                                    .background(Color("TextPrimary").opacity(0.08))
+                                    .padding(.vertical, 4)
+                                
+                                // Clean Contribution Legend
+                                HStack {
+                                    Text("Less")
+                                        .font(.system(size: 11, weight: .medium))
+                                        .foregroundColor(Color("TextPrimary").opacity(0.5))
+                                    
+                                    Spacer()
+                                    
+                                    HStack(spacing: 6) {
+                                        ForEach(0..<4) { level in
+                                            RoundedRectangle(cornerRadius: 3)
+                                                .fill(level == 0 
+                                                      ? (themeManager.isDarkMode ? Color.white.opacity(0.06) : Color.black.opacity(0.04)) 
+                                                      : themeManager.currentTheme.color.opacity(Double(level) * 0.28 + 0.1))
+                                                .frame(width: 12, height: 12)
+                                        }
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Text("More")
+                                        .font(.system(size: 11, weight: .medium))
+                                        .foregroundColor(Color("TextPrimary").opacity(0.5))
+                                }
+                                .padding(.horizontal, 4)
+                            }
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 18)
+                                    .fill(Color("CardBackground"))
+                                    .shadow(color: Color.black.opacity(0.03), radius: 10, x: 0, y: 5)
+                            )
+                            .padding(.horizontal)
+                        }
+                        
+                        // Selected Day Dashboard Summary
+                        if let day = selectedDay {
+                            VStack(alignment: .leading, spacing: 14) {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(day.date.formatted(.dateTime.weekday(.wide)))
+                                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                                            .foregroundColor(themeManager.currentTheme.color)
+                                            .textCase(.uppercase)
+                                        
+                                        Text(day.date.formatted(.dateTime.day().month().year()))
+                                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                                            .foregroundColor(Color("Foreground"))
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    // Task completion rate badge
+                                    HStack(spacing: 6) {
+                                        Image(systemName: day.intensity >= 1.0 && day.taskCount > 0 ? "checkmark.circle.fill" : "circle.dashed")
+                                            .foregroundColor(day.intensity >= 1.0 && day.taskCount > 0 ? .green : themeManager.currentTheme.color)
+                                            .font(.system(size: 14, weight: .semibold))
+                                        
+                                        Text("\(day.completedCount)/\(day.taskCount) Tasks")
+                                            .font(.system(size: 13, weight: .bold, design: .rounded))
+                                            .foregroundColor(Color("Foreground"))
+                                    }
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(
+                                        Capsule()
+                                            .fill(themeManager.currentTheme.color.opacity(0.1))
+                                    )
+                                }
+                                
+                                if day.taskCount > 0 {
+                                    Button(action: {
+                                        let impact = UIImpactFeedbackGenerator(style: .medium)
+                                        impact.impactOccurred()
+                                        showingTasksForDate = day.date
+                                    }) {
+                                        HStack {
+                                            Text("View & Manage Tasks")
+                                                .font(.system(size: 14, weight: .bold, design: .rounded))
+                                            Spacer()
+                                            Image(systemName: "arrow.right")
+                                                .font(.system(size: 13, weight: .bold))
+                                        }
+                                        .foregroundColor(.white)
+                                        .padding()
+                                        .background(
                                             LinearGradient(
-                                                colors: [Color("Primary"), Color("Secondary")],
-                                                startPoint: .bottom,
-                                                endPoint: .top
+                                                colors: [themeManager.currentTheme.color, themeManager.currentTheme.color.opacity(0.85)],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
                                             )
                                         )
+                                        .cornerRadius(12)
+                                        .shadow(color: themeManager.currentTheme.color.opacity(0.15), radius: 6, x: 0, y: 3)
+                                    }
+                                } else {
+                                    Text("No tasks scheduled for this day.")
+                                        .font(.system(size: 13, design: .rounded))
+                                        .foregroundColor(Color("TextPrimary").opacity(0.6))
+                                        .padding(.vertical, 4)
+                                }
+                            }
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 18)
+                                    .fill(Color("CardBackground"))
+                                    .shadow(color: Color.black.opacity(0.03), radius: 10, x: 0, y: 5)
+                            )
+                            .padding(.horizontal)
+                            .transition(.asymmetric(insertion: .opacity.combined(with: .move(edge: .bottom)), removal: .opacity))
+                        }
+                        
+                        // Productivity insights
+                        VStack(alignment: .leading, spacing: 14) {
+                            Text("Productivity Insights")
+                                .font(.system(size: 18, weight: .bold, design: .rounded))
+                                .foregroundColor(Color("Foreground"))
+                                .padding(.horizontal, 4)
+                            
+                            // Productivity chart
+                            VStack(alignment: .leading, spacing: 14) {
+                                HStack {
+                                    Image(systemName: "chart.line.uptrend.xyaxis")
+                                        .foregroundColor(themeManager.currentTheme.color)
+                                        .font(.headline)
+                                    
+                                    Text("Task Completion Rate")
+                                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                                        .foregroundColor(Color("Foreground"))
+                                }
+                                
+                                Chart {
+                                    ForEach(taskViewModel.calendarData.flatMap { $0.days }) { day in
+                                        if day.taskCount > 0 {
+                                            BarMark(
+                                                x: .value("Date", day.date, unit: .day),
+                                                y: .value("Completion Rate", day.intensity)
+                                            )
+                                            .foregroundStyle(
+                                                LinearGradient(
+                                                    colors: [themeManager.currentTheme.color, themeManager.currentTheme.color.opacity(0.4)],
+                                                    startPoint: .top,
+                                                    endPoint: .bottom
+                                                )
+                                            )
+                                            .cornerRadius(4)
+                                        }
+                                    }
+                                }
+                                .frame(height: 150)
+                                .chartYScale(domain: 0...1)
+                                .chartXAxis {
+                                    AxisMarks(values: .stride(by: .day, count: 7)) { _ in
+                                        AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, lineCap: .round, dash: [2, 4]))
+                                            .foregroundStyle(Color("TextPrimary").opacity(0.12))
+                                        AxisTick()
+                                        AxisValueLabel(format: .dateTime.day().month())
+                                            .font(.system(size: 9, weight: .semibold, design: .rounded))
+                                            .foregroundStyle(Color("TextPrimary").opacity(0.5))
+                                    }
+                                }
+                                .chartYAxis {
+                                    AxisMarks(values: [0.0, 0.5, 1.0]) { value in
+                                        AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, lineCap: .round, dash: [2, 4]))
+                                            .foregroundStyle(Color("TextPrimary").opacity(0.12))
+                                        AxisValueLabel {
+                                            if let rate = value.as(Double.self) {
+                                                Text("\(Int(rate * 100))%")
+                                                    .font(.system(size: 9, weight: .semibold, design: .rounded))
+                                                    .foregroundStyle(Color("TextPrimary").opacity(0.5))
+                                            }
+                                        }
                                     }
                                 }
                             }
-                            .frame(height: 150)
-                            .chartYScale(domain: 0...1)
-                            .chartXAxis {
-                                AxisMarks(values: .stride(by: .day, count: 7)) { _ in
-                                    AxisGridLine()
-                                    AxisTick()
-                                    AxisValueLabel(format: .dateTime.day().month())
-                                }
-                            }
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 18)
+                                    .fill(Color("CardBackground"))
+                                    .shadow(color: Color.black.opacity(0.03), radius: 10, x: 0, y: 5)
+                            )
                         }
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(Color("CardBackground"))
-                                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
-                        )
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
-                    
-                    Spacer()
+                    .padding(.vertical)
                 }
-                .padding(.vertical)
             }
             .navigationTitle("Productivity Heatmap")
             .navigationBarTitleDisplayMode(.inline)
@@ -149,47 +310,105 @@ struct HeatmapCalendarView: View {
                 if let date = showingTasksForDate {
                     TasksForDateView(date: date)
                         .environmentObject(taskViewModel)
+                        .environmentObject(themeManager)
                 }
             }
             .onAppear {
                 // Update the heatmapViewModel with the current taskViewModel
                 heatmapViewModel.monthData = taskViewModel.calendarData
+                
+                // Select today's date automatically if available
+                let today = Date()
+                if let currentMonth = taskViewModel.calendarData.first {
+                    if let todayData = currentMonth.days.first(where: { Calendar.current.isDate($0.date, inSameDayAs: today) }) {
+                        selectedDay = todayData
+                    }
+                }
             }
         }
-
     }
 }
+
 struct DayCell: View {
     let day: DayData
     let isSelected: Bool
+    let themeColor: Color
+    let isDarkMode: Bool
     let onTap: () -> Void
     
     var body: some View {
-        Button(action: onTap) {
-            VStack {
-                Text(day.date.formatted(.dateTime.day()))
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(isSelected ? .white : Color("Foreground"))
+        let hasTasks = day.taskCount > 0
+        let completionRate = hasTasks ? Double(day.completedCount) / Double(day.taskCount) : 0.0
+        
+        // Dynamic cell color
+        let cellColor: Color = {
+            if isSelected {
+                return themeColor
+            }
+            if !hasTasks {
+                return isDarkMode ? Color.white.opacity(0.06) : Color.black.opacity(0.04)
+            }
+            // Heatmap intensity matching theme color
+            if completionRate >= 0.8 {
+                return themeColor.opacity(0.9)
+            } else if completionRate >= 0.5 {
+                return themeColor.opacity(0.6)
+            } else if completionRate > 0 {
+                return themeColor.opacity(0.3)
+            } else {
+                return themeColor.opacity(0.12)
+            }
+        }()
+        
+        let textColor: Color = {
+            if isSelected {
+                return .white
+            }
+            if !hasTasks {
+                return Color("Foreground").opacity(0.6)
+            }
+            if completionRate >= 0.8 {
+                return .white
+            }
+            return Color("Foreground")
+        }()
+        
+        Button(action: {
+            let impact = UIImpactFeedbackGenerator(style: .light)
+            impact.impactOccurred()
+            onTap()
+        }) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(cellColor)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(themeColor.opacity(isSelected ? 0.35 : 0.0), lineWidth: 1.5)
+                    )
+                    .shadow(color: isSelected ? themeColor.opacity(0.3) : .clear, radius: 4, x: 0, y: 2)
                 
-                if day.taskCount > 0 {
-                    Text("\(day.completedCount)/\(day.taskCount)")
-                        .font(.system(size: 10))
-                        .foregroundColor(isSelected ? .white.opacity(0.8) : Color("TextPrimary").opacity(0.7))
+                VStack(spacing: 2) {
+                    Text(String(Calendar.current.component(.day, from: day.date)))
+                        .font(.system(size: 14, weight: isSelected || completionRate >= 0.8 ? .bold : .medium, design: .rounded))
+                        .foregroundColor(textColor)
+                    
+                    if hasTasks {
+                        Circle()
+                            .fill(isSelected ? .white : (completionRate >= 0.8 ? .white.opacity(0.8) : themeColor))
+                            .frame(width: 4, height: 4)
+                    }
                 }
             }
-            .frame(height: 40)
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(isSelected ? Color("Primary") : day.color)
-            )
+            .frame(height: 44)
         }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
 struct TasksForDateView: View {
     let date: Date
     @EnvironmentObject private var taskViewModel: TaskViewModel
+    @EnvironmentObject private var themeManager: ThemeManager
     @Environment(\.presentationMode) var presentationMode
     
     // Computed property to get tasks for the date
@@ -213,12 +432,12 @@ struct TasksForDateView: View {
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(date.formatted(.dateTime.weekday(.wide)))
-                                .font(.headline)
-                                .foregroundColor(Color("TextPrimary"))
+                                .font(.system(size: 11, weight: .bold, design: .rounded))
+                                .foregroundColor(themeManager.currentTheme.color)
+                                .textCase(.uppercase)
                             
                             Text(date.formatted(.dateTime.day().month().year()))
-                                .font(.title)
-                                .fontWeight(.bold)
+                                .font(.system(size: 24, weight: .bold, design: .rounded))
                                 .foregroundColor(Color("Foreground"))
                         }
                         
@@ -227,49 +446,51 @@ struct TasksForDateView: View {
                         // Task count badge
                         VStack(alignment: .center, spacing: 4) {
                             Text("\(completedCount)/\(tasksForDate.count)")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .foregroundColor(Color("Primary"))
+                                .font(.system(size: 20, weight: .bold, design: .rounded))
+                                .foregroundColor(themeManager.currentTheme.color)
                             
                             Text("Completed")
-                                .font(.caption)
-                                .foregroundColor(Color("TextPrimary"))
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(Color("TextPrimary").opacity(0.7))
                         }
-                        .padding()
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
                         .background(
-                            RoundedRectangle(cornerRadius: 12)
+                            RoundedRectangle(cornerRadius: 14)
                                 .fill(Color("CardBackground"))
+                                .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 3)
                         )
                     }
                     .padding(.horizontal)
+                    .padding(.top, 8)
                     
                     // Tasks list
                     if tasksForDate.isEmpty {
                         VStack(spacing: 20) {
                             Image(systemName: "calendar.badge.clock")
                                 .font(.system(size: 60))
-                                .foregroundColor(Color("Primary").opacity(0.7))
+                                .foregroundColor(themeManager.currentTheme.color.opacity(0.6))
                             
                             Text("No tasks for this day")
-                                .font(.headline)
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
                                 .foregroundColor(Color("TextPrimary"))
                             
                             Button(action: {
                                 presentationMode.wrappedValue.dismiss()
                             }) {
                                 Text("Go Back")
-                                    .fontWeight(.medium)
+                                    .font(.system(size: 14, weight: .bold, design: .rounded))
                                     .padding(.horizontal, 30)
-                                    .padding(.vertical, 15)
-                                    .background(Color("Primary"))
+                                    .padding(.vertical, 14)
+                                    .background(themeManager.currentTheme.color)
                                     .foregroundColor(.white)
                                     .cornerRadius(12)
                             }
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
-                        ScrollView {
-                            VStack(spacing: 15) {
+                        ScrollView(showsIndicators: false) {
+                            VStack(spacing: 14) {
                                 ForEach(tasksForDate) { task in
                                     TaskCard(task: task) {
                                         withAnimation {
@@ -286,17 +507,21 @@ struct TasksForDateView: View {
                                 }
                             }
                             .padding(.horizontal)
+                            .padding(.bottom, 20)
                         }
                     }
                 }
-                .padding(.vertical)
             }
-            .navigationTitle("Tasks")
+            .navigationTitle("Day's Focus")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(action: {
                         presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Text("Done")
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .foregroundColor(themeManager.currentTheme.color)
                     }
                 }
             }
@@ -304,9 +529,9 @@ struct TasksForDateView: View {
     }
 }
 
-
 #Preview {
     HeatmapCalendarView(taskViewModel: TaskViewModel())
         .environmentObject(TaskViewModel())
+        .environmentObject(ThemeManager())
         .preferredColorScheme(.dark)
 }
