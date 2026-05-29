@@ -64,7 +64,7 @@ struct CustomButton: View {
                 }
                 
                 Text(title)
-                    .fontWeight(.medium)
+                    .font(.satoshi(.body, weight: .bold))
             }
             .frame(maxWidth: .infinity)
             .padding()

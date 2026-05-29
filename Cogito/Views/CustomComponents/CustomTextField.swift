@@ -16,9 +16,11 @@ struct CustomTextField: View {
             
             if isSecure {
                 SecureField(placeholder, text: $text)
+                    .font(.satoshi(.body, weight: .medium))
                     .foregroundColor(Color("Foreground"))
             } else {
                 TextField(placeholder, text: $text)
+                    .font(.satoshi(.body, weight: .medium))
                     .foregroundColor(Color("Foreground"))
             }
         }

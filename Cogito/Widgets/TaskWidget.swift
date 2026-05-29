@@ -2,6 +2,10 @@ import WidgetKit
 import SwiftUI
 
 struct TaskWidgetBundle: WidgetBundle {
+    init() {
+        FontLoader.registerFonts()
+    }
+
     var body: some Widget {
         TaskWidget()
         TaskWidgetSmall()

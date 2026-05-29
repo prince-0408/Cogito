@@ -28,13 +28,12 @@ struct TaskWidgetSmallView: View {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundColor(.green)
                 Text("\(entry.completedCount)/\(entry.totalCount)")
-                    .font(.headline)
-                    .fontWeight(.bold)
+                    .font(.satoshi(.headline, weight: .bold))
                 Spacer()
             }
             
             Text("Today's Tasks")
-                .font(.caption)
+                .font(.satoshi(.caption, weight: .regular))
                 .foregroundColor(.secondary)
             
             if let firstTask = entry.tasks.first {
@@ -43,7 +42,7 @@ struct TaskWidgetSmallView: View {
                         .fill(priorityColor(firstTask.priority))
                         .frame(width: 6, height: 6)
                     Text(firstTask.title)
-                        .font(.caption2)
+                        .font(.satoshi(.caption2, weight: .regular))
                         .lineLimit(1)
                 }
             }
@@ -63,11 +62,10 @@ struct TaskWidgetMediumView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Today")
-                        .font(.caption)
+                        .font(.satoshi(.caption, weight: .regular))
                         .foregroundColor(.secondary)
                     Text("\(entry.completedCount)/\(entry.totalCount) done")
-                        .font(.title3)
-                        .fontWeight(.bold)
+                        .font(.satoshi(.title3, weight: .bold))
                 }
                 
                 Spacer()
@@ -100,21 +98,20 @@ struct TaskWidgetLargeView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Today's Tasks")
-                        .font(.caption)
+                        .font(.satoshi(.caption, weight: .regular))
                         .foregroundColor(.secondary)
                     Text("\(entry.completedCount)/\(entry.totalCount) completed")
-                        .font(.title2)
-                        .fontWeight(.bold)
+                        .font(.satoshi(.title2, weight: .bold))
                 }
                 
                 Spacer()
                 
                 HStack(spacing: 12) {
                     Label("\(entry.tasks.filter { $0.priority == "High" }.count)", systemImage: "exclamationmark.circle.fill")
-                        .font(.caption)
+                        .font(.satoshi(.caption, weight: .bold))
                         .foregroundColor(.red)
                     Label("\(entry.tasks.filter { $0.priority == "Medium" }.count)", systemImage: "minus.circle.fill")
-                        .font(.caption)
+                        .font(.satoshi(.caption, weight: .bold))
                         .foregroundColor(.orange)
                 }
             }
@@ -128,7 +125,7 @@ struct TaskWidgetLargeView: View {
                 
                 if entry.tasks.count > 5 {
                     Text("+ \(entry.tasks.count - 5) more tasks")
-                        .font(.caption)
+                        .font(.satoshi(.caption, weight: .regular))
                         .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -152,12 +149,11 @@ struct TaskRow: View {
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(task.title)
-                    .font(.caption)
-                    .fontWeight(.medium)
+                    .font(.satoshi(.caption, weight: .medium))
                     .lineLimit(1)
                 
                 Text(formatDate(task.dueDate))
-                    .font(.caption2)
+                    .font(.satoshi(.caption2, weight: .regular))
                     .foregroundColor(.secondary)
             }
             

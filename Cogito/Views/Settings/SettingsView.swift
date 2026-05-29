@@ -180,7 +180,7 @@ struct SettingsView: View {
                                     trailingContent: {
                                         if notificationStatus == .authorized {
                                             Text("Enabled")
-                                                .font(.caption)
+                                                .font(.satoshi(.caption, weight: .bold))
                                                 .foregroundColor(.green)
                                                 .padding(.horizontal, 8)
                                                 .padding(.vertical, 4)
@@ -190,7 +190,7 @@ struct SettingsView: View {
                                                 )
                                         } else if notificationStatus == .denied {
                                             Text("Disabled")
-                                                .font(.caption)
+                                                .font(.satoshi(.caption, weight: .bold))
                                                 .foregroundColor(.red)
                                                 .padding(.horizontal, 8)
                                                 .padding(.vertical, 4)
@@ -510,13 +510,13 @@ struct NotificationSettingsView: View {
                                 .font(.title2)
                             
                             Text("Notification Status")
-                                .font(.headline)
+                                .font(.satoshi(.headline, weight: .bold))
                                 .foregroundColor(Color("TextPrimary"))
                             
                             Spacer()
                             
                             Text(notificationStatus == .authorized ? "Enabled" : "Disabled")
-                                .font(.subheadline)
+                                .font(.satoshi(.subheadline, weight: .bold))
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 5)
                                 .background(
@@ -528,7 +528,7 @@ struct NotificationSettingsView: View {
                         
                         if notificationStatus == .denied {
                             Text("Notifications are currently disabled. Please enable them in your device settings.")
-                                .font(.caption)
+                                .font(.satoshi(.caption, weight: .regular))
                                 .foregroundColor(.red)
                                 .padding(.top, 5)
                             
@@ -538,7 +538,7 @@ struct NotificationSettingsView: View {
                                 }
                             }) {
                                 Text("Open Settings")
-                                    .font(.caption)
+                                    .font(.satoshi(.caption, weight: .bold))
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 6)
                                     .background(Color("Primary"))
@@ -577,7 +577,7 @@ struct NotificationSettingsView: View {
                         // Default Reminder Time
                         VStack(alignment: .leading, spacing: 10) {
                             Text("Default Reminder Time")
-                                .font(.headline)
+                                .font(.satoshi(.headline, weight: .bold))
                                 .foregroundColor(Color("TextPrimary"))
                             
                             Picker("Default Reminder Time", selection: $defaultReminderTime) {
@@ -599,7 +599,7 @@ struct NotificationSettingsView: View {
                         // Reminder Sound
                         VStack(alignment: .leading, spacing: 10) {
                             Text("Reminder Sound")
-                                .font(.headline)
+                                .font(.satoshi(.headline, weight: .bold))
                                 .foregroundColor(Color("TextPrimary"))
                             
                             Picker("Reminder Sound", selection: $reminderSound) {
@@ -620,11 +620,11 @@ struct NotificationSettingsView: View {
                     // Explanation
                     VStack(alignment: .leading, spacing: 10) {
                         Text("About Notifications")
-                            .font(.headline)
+                            .font(.satoshi(.headline, weight: .bold))
                             .foregroundColor(Color("TextPrimary"))
                         
                         Text("Cogito can send you reminders before your tasks are due. You can set a default reminder time here, or customize it for each task individually.")
-                            .font(.subheadline)
+                            .font(.satoshi(.subheadline, weight: .regular))
                             .foregroundColor(Color("TextPrimary").opacity(0.7))
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -693,16 +693,15 @@ struct AboutView: View {
                             .foregroundColor(Color("Primary"))
                         
                         Text("Cogito")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
+                            .font(.satoshi(.largeTitle, weight: .bold))
                             .foregroundColor(Color("Foreground"))
                         
                         Text("AI-Powered Task Manager")
-                            .font(.headline)
+                            .font(.satoshi(.headline, weight: .bold))
                             .foregroundColor(Color("TextPrimary"))
                         
                         Text("Version 1.0.0")
-                            .font(.subheadline)
+                            .font(.satoshi(.subheadline, weight: .regular))
                             .foregroundColor(Color("TextPrimary").opacity(0.7))
                     }
                     .padding()
@@ -715,16 +714,16 @@ struct AboutView: View {
                     // About Text
                     VStack(alignment: .leading, spacing: 15) {
                         Text("About Cogito")
-                            .font(.headline)
+                            .font(.satoshi(.headline, weight: .bold))
                             .foregroundColor(Color("TextPrimary"))
                         
                         Text("Cogito is an advanced AI-powered task manager that helps you organize, track, and optimize your workflow using artificial intelligence.")
-                            .font(.subheadline)
+                            .font(.satoshi(.subheadline, weight: .regular))
                             .foregroundColor(Color("TextPrimary"))
                             .fixedSize(horizontal: false, vertical: true)
                         
                         Text("Key Features:")
-                            .font(.headline)
+                            .font(.satoshi(.headline, weight: .bold))
                             .foregroundColor(Color("TextPrimary"))
                             .padding(.top, 5)
                         
@@ -745,15 +744,15 @@ struct AboutView: View {
                     // Credits
                     VStack(alignment: .leading, spacing: 15) {
                         Text("Credits")
-                            .font(.headline)
+                            .font(.satoshi(.headline, weight: .bold))
                             .foregroundColor(Color("TextPrimary"))
                         
                         Text("Developed with ❤️ using SwiftUI")
-                            .font(.subheadline)
+                            .font(.satoshi(.subheadline, weight: .regular))
                             .foregroundColor(Color("TextPrimary"))
                         
                         Text("AI powered by OpenAI")
-                            .font(.subheadline)
+                            .font(.satoshi(.subheadline, weight: .regular))
                             .foregroundColor(Color("TextPrimary"))
                     }
                     .padding()
@@ -783,12 +782,11 @@ struct FeatureItem: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
+                    .font(.satoshi(.subheadline, weight: .bold))
                     .foregroundColor(Color("Foreground"))
                 
                 Text(description)
-                    .font(.caption)
+                    .font(.satoshi(.caption, weight: .regular))
                     .foregroundColor(Color("TextPrimary").opacity(0.7))
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -806,12 +804,11 @@ struct PrivacyPolicyView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     Text("Privacy Policy")
-                        .font(.title)
-                        .fontWeight(.bold)
+                        .font(.satoshi(.title, weight: .bold))
                         .foregroundColor(Color("Foreground"))
                     
                     Text("Last Updated: March 1, 2025")
-                        .font(.subheadline)
+                        .font(.satoshi(.subheadline, weight: .regular))
                         .foregroundColor(Color("TextPrimary").opacity(0.7))
                     
                     PolicySection(
@@ -845,7 +842,7 @@ struct PrivacyPolicyView: View {
                     )
                     
                     Text("If you have any questions about this privacy policy, please contact us.")
-                        .font(.subheadline)
+                        .font(.satoshi(.subheadline, weight: .regular))
                         .foregroundColor(Color("TextPrimary"))
                         .padding(.top, 10)
                 }
@@ -864,11 +861,11 @@ struct PolicySection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
-                .font(.headline)
+                .font(.satoshi(.headline, weight: .bold))
                 .foregroundColor(Color("Foreground"))
             
             Text(content)
-                .font(.subheadline)
+                .font(.satoshi(.subheadline, weight: .regular))
                 .foregroundColor(Color("TextPrimary"))
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -884,12 +881,11 @@ struct TermsOfServiceView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     Text("Terms of Service")
-                        .font(.title)
-                        .fontWeight(.bold)
+                        .font(.satoshi(.title, weight: .bold))
                         .foregroundColor(Color("Foreground"))
                     
                     Text("Last Updated: March 1, 2025")
-                        .font(.subheadline)
+                        .font(.satoshi(.subheadline, weight: .regular))
                         .foregroundColor(Color("TextPrimary").opacity(0.7))
                     
                     PolicySection(
@@ -923,7 +919,7 @@ struct TermsOfServiceView: View {
                     )
                     
                     Text("If you have any questions about these terms, please contact us.")
-                        .font(.subheadline)
+                        .font(.satoshi(.subheadline, weight: .regular))
                         .foregroundColor(Color("TextPrimary"))
                         .padding(.top, 10)
                 }

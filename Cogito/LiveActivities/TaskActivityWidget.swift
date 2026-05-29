@@ -3,6 +3,10 @@ import WidgetKit
 import ActivityKit
 
 struct TaskActivityWidget: Widget {
+    init() {
+        FontLoader.registerFonts()
+    }
+
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: TaskActivityAttributes.self) { context in
             // Lock screen / banner UI
@@ -19,7 +23,7 @@ struct TaskActivityWidget: Widget {
                                       context.attributes.taskCategory == "Education" ? "book.fill" : "ellipsis.circle.fill")
                             .foregroundColor(.white)
                         Text(context.state.taskTitle)
-                            .font(.headline)
+                            .font(.satoshi(.headline, weight: .bold))
                             .foregroundColor(.white)
                             .lineLimit(1)
                     }
@@ -28,8 +32,7 @@ struct TaskActivityWidget: Widget {
                 DynamicIslandExpandedRegion(.trailing) {
                     VStack(alignment: .trailing, spacing: 4) {
                         Text(timeRemainingString(from: context.state.timeRemaining))
-                            .font(.caption)
-                            .fontWeight(.bold)
+                            .font(.satoshi(.caption, weight: .bold))
                             .foregroundColor(.white)
                         
                         if context.state.isCompleted {
@@ -42,7 +45,7 @@ struct TaskActivityWidget: Widget {
                 DynamicIslandExpandedRegion(.bottom) {
                     HStack {
                         Text("Due: \(formatDate(context.attributes.dueDate))")
-                            .font(.caption2)
+                            .font(.satoshi(.caption2, weight: .regular))
                             .foregroundColor(.white.opacity(0.8))
                         
                         Spacer()
@@ -51,8 +54,7 @@ struct TaskActivityWidget: Widget {
                             // Complete task action
                         } label: {
                             Text("Complete")
-                                .font(.caption)
-                                .fontWeight(.semibold)
+                                .font(.satoshi(.caption, weight: .bold))
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
@@ -73,8 +75,7 @@ struct TaskActivityWidget: Widget {
             } compactTrailing: {
                 // Compact trailing
                 Text(timeRemainingString(from: context.state.timeRemaining))
-                    .font(.caption2)
-                    .fontWeight(.bold)
+                    .font(.satoshi(.caption2, weight: .bold))
                     .foregroundColor(.white)
             } minimal: {
                 // Minimal
@@ -110,11 +111,11 @@ struct LockScreenLiveActivityView: View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text(context.state.taskTitle)
-                    .font(.headline)
+                    .font(.satoshi(.headline, weight: .bold))
                     .foregroundColor(.white)
                 
                 Text(context.attributes.taskCategory)
-                    .font(.caption)
+                    .font(.satoshi(.caption, weight: .regular))
                     .foregroundColor(.white.opacity(0.8))
             }
             
@@ -122,12 +123,11 @@ struct LockScreenLiveActivityView: View {
             
             VStack(alignment: .trailing, spacing: 4) {
                 Text(timeRemainingString(from: context.state.timeRemaining))
-                    .font(.title3)
-                    .fontWeight(.bold)
+                    .font(.satoshi(.title3, weight: .bold))
                     .foregroundColor(.white)
                 
                 Text(formatDate(context.attributes.dueDate))
-                    .font(.caption)
+                    .font(.satoshi(.caption, weight: .regular))
                     .foregroundColor(.white.opacity(0.8))
             }
         }
