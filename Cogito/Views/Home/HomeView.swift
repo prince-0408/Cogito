@@ -59,12 +59,11 @@ struct HomeView: View {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Hello,")
-                                    .font(.title2)
+                                    .font(.satoshi(.title2, weight: .regular))
                                     .foregroundColor(Color("TextPrimary"))
                                 
                                 Text("What's on your mind today?")
-                                    .font(.largeTitle)
-                                    .fontWeight(.bold)
+                                    .font(.satoshi(.largeTitle, weight: .bold))
                                     .foregroundColor(Color("Foreground"))
                             }
                             
@@ -77,8 +76,7 @@ struct HomeView: View {
                                     impactFeedback.impactOccurred()
                                 }) {
                                     Text(isEditMode ? "Done" : "Edit")
-                                        .font(.subheadline)
-                                        .fontWeight(.medium)
+                                        .font(.satoshi(.subheadline, weight: .medium))
                                         .foregroundColor(Color("Primary"))
                                         .padding(.horizontal, 12)
                                         .padding(.vertical, 6)
@@ -117,7 +115,7 @@ struct HomeView: View {
                         if (aiViewModel.isEnabled && !aiViewModel.taskSuggestions.isEmpty) || tutorialManager.isTutorialActive {
                             VStack(alignment: .leading, spacing: 10) {
                                 Text("AI Suggestions")
-                                    .font(.headline)
+                                    .font(.satoshi(.headline, weight: .bold))
                                     .foregroundColor(Color("TextPrimary"))
                                     .padding(.horizontal)
                                 
@@ -169,7 +167,7 @@ struct HomeView: View {
                         // Tasks List
                         VStack(alignment: .leading, spacing: 15) {
                             Text("Today's Tasks")
-                                .font(.headline)
+                                .font(.satoshi(.headline, weight: .bold))
                                 .foregroundColor(Color("TextPrimary"))
                                 .padding(.horizontal)
                             
@@ -340,24 +338,24 @@ struct SuggestionCard: View {
                     .foregroundColor(suggestion.category.color)
                 
                 Text(suggestion.category.rawValue)
-                    .font(.caption)
+                    .font(.satoshi(.caption, weight: .regular))
                     .foregroundColor(Color("TextPrimary"))
                 
                 Spacer()
                 
                 Text("\(Int(suggestion.confidence * 100))%")
-                    .font(.caption)
+                    .font(.satoshi(.caption, weight: .regular))
                     .foregroundColor(Color("TextPrimary").opacity(0.7))
             }
             
             Text(suggestion.title)
-                .font(.headline)
+                .font(.satoshi(.headline, weight: .bold))
                 .foregroundColor(Color("Foreground"))
                 .lineLimit(2)
             
             HStack {
                 Text(suggestion.priority.rawValue)
-                    .font(.caption)
+                    .font(.satoshi(.caption, weight: .medium))
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
                     .background(suggestion.priority.color.opacity(0.2))
@@ -372,8 +370,7 @@ struct SuggestionCard: View {
                     onAccept()
                 }) {
                     Text("Add")
-                        .font(.caption)
-                        .fontWeight(.medium)
+                        .font(.satoshi(.caption, weight: .medium))
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
                         .background(Color("Primary"))
@@ -408,8 +405,7 @@ struct CategoryFilterButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.subheadline)
-                .fontWeight(isSelected ? .bold : .medium)
+                .font(.satoshi(.subheadline, weight: isSelected ? .bold : .medium))
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
                 .background(
@@ -456,7 +452,7 @@ struct TaskCard: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text(task.title)
-                        .font(.headline)
+                        .font(.satoshi(.headline, weight: .bold))
                         .foregroundColor(task.isCompleted ? Color("TextPrimary").opacity(0.6) : Color("Foreground"))
                         .strikethrough(task.isCompleted)
                     
@@ -468,13 +464,13 @@ struct TaskCard: View {
                 
                 HStack {
                     Text(task.formattedDueDate)
-                        .font(.caption)
+                        .font(.satoshi(.caption, weight: .regular))
                         .foregroundColor(Color("TextPrimary").opacity(0.8))
                     
                     Spacer()
                     
                     Text(task.priority.rawValue)
-                        .font(.caption)
+                        .font(.satoshi(.caption, weight: .medium))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(task.priority.color.opacity(0.2))
@@ -521,11 +517,11 @@ struct EmptyTaskView: View {
                 .foregroundColor(Color("Primary").opacity(0.7))
             
             Text("No tasks for today!")
-                .font(.headline)
+                .font(.satoshi(.headline, weight: .bold))
                 .foregroundColor(Color("TextPrimary"))
             
             Text("Tap the + button to add a new task")
-                .font(.subheadline)
+                .font(.satoshi(.subheadline, weight: .regular))
                 .foregroundColor(Color("TextPrimary").opacity(0.7))
                 .multilineTextAlignment(.center)
         }

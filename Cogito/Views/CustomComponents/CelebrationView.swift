@@ -41,7 +41,7 @@ struct CelebrationView: View {
                                 )
                             
                             Image(systemName: achievementType.icon)
-                                .font(.system(size: 22, weight: .bold))
+                                .font(.satoshi(size: 22, weight: .bold))
                                 .foregroundColor(achievementType.color)
                                 .shadow(color: achievementType.color.opacity(0.4), radius: 6, x: 0, y: 3)
                                 .rotationEffect(.degrees(showCelebration ? 0 : -30))
@@ -50,11 +50,11 @@ struct CelebrationView: View {
                         // Text Layout
                         VStack(alignment: .leading, spacing: 3) {
                             Text(achievementType.title)
-                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                .font(.satoshi(size: 16, weight: .bold))
                                 .foregroundColor(Color("Foreground"))
                             
                             Text(achievementType.subtitle)
-                                .font(.system(size: 13, weight: .medium))
+                                .font(.satoshi(size: 13, weight: .medium))
                                 .foregroundColor(Color("TextPrimary").opacity(0.85))
                                 .lineLimit(1)
                         }
@@ -66,7 +66,7 @@ struct CelebrationView: View {
                             dismiss()
                         }) {
                             Image(systemName: "xmark")
-                                .font(.system(size: 12, weight: .bold))
+                                .font(.satoshi(size: 12, weight: .bold))
                                 .foregroundColor(Color("TextPrimary").opacity(0.5))
                                 .padding(8)
                                 .background(Circle().fill(Color("Foreground").opacity(0.05)))

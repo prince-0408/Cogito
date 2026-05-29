@@ -88,13 +88,13 @@ struct TabButton: View {
         }) {
             HStack(spacing: 8) {
                 Image(systemName: item.icon)
-                    .font(.system(size: 17, weight: .bold))
+                    .font(.satoshi(size: 17, weight: .bold))
                     .foregroundColor(isSelected ? accentColor : Color("TextPrimary").opacity(0.55))
                     .shadow(color: isSelected ? accentColor.opacity(0.3) : .clear, radius: 4, x: 0, y: 2)
                 
                 if isSelected {
                     Text(item.title)
-                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .font(.satoshi(size: 13, weight: .bold))
                         .foregroundColor(accentColor)
                         .transition(.opacity.combined(with: .scale(scale: 0.95)))
                 }

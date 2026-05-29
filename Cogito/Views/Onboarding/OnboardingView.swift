@@ -198,11 +198,11 @@ struct OnboardingPageView: View {
                 // Onboarding Content
                 VStack(spacing: 16) {
                     Text(page.title)
-                        .font(.system(size: 40, weight: .semibold, design: .serif))
+                        .font(.satoshi(size: 40, weight: .black))
                         .multilineTextAlignment(.center)
                     
                     Text(page.description)
-                        .font(.system(size: 20))
+                        .font(.satoshi(size: 20, weight: .regular))
                         .multilineTextAlignment(.center)
                         .foregroundColor(.white.opacity(0.8))
                         .padding(.top, 8)

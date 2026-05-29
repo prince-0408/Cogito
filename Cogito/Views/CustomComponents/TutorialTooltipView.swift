@@ -27,7 +27,7 @@ struct TutorialTooltipView: View {
                 // Header + Close Button
                 HStack(alignment: .top) {
                     Text(step.title)
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .font(.satoshi(size: 18, weight: .bold))
                         .foregroundColor(Color("Foreground"))
                     
                     Spacer()
@@ -36,7 +36,7 @@ struct TutorialTooltipView: View {
                         tutorialManager.skipTutorial()
                     }) {
                         Image(systemName: "xmark")
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(.satoshi(size: 14, weight: .bold))
                             .foregroundColor(Color("TextPrimary").opacity(0.5))
                             .padding(4)
                             .background(Circle().fill(Color("Foreground").opacity(0.05)))
@@ -46,7 +46,7 @@ struct TutorialTooltipView: View {
                 
                 // Description Text
                 Text(step.description)
-                    .font(.system(size: 14, weight: .regular))
+                    .font(.satoshi(size: 14, weight: .regular))
                     .foregroundColor(Color("TextPrimary").opacity(0.9))
                     .lineSpacing(4)
                     .fixedSize(horizontal: false, vertical: true)
@@ -55,7 +55,7 @@ struct TutorialTooltipView: View {
                 HStack {
                     // Step Counter Index
                     Text("\(tutorialManager.currentStepIndex + 1)/\(tutorialManager.steps.count)")
-                        .font(.system(size: 14, weight: .semibold, design: .monospaced))
+                        .font(.satoshi(size: 14, weight: .bold))
                         .foregroundColor(Color("TextPrimary").opacity(0.6))
                     
                     Spacer()
@@ -67,7 +67,7 @@ struct TutorialTooltipView: View {
                                 tutorialManager.previousStep()
                             }) {
                                 Image(systemName: "chevron.left")
-                                    .font(.system(size: 14, weight: .bold))
+                                    .font(.satoshi(size: 14, weight: .bold))
                                     .foregroundColor(themeManager.currentTheme.color)
                                     .frame(width: 36, height: 36)
                                     .background(
@@ -83,7 +83,7 @@ struct TutorialTooltipView: View {
                             tutorialManager.nextStep()
                         }) {
                             Text(tutorialManager.currentStepIndex == tutorialManager.steps.count - 1 ? "Done" : "Next")
-                                .font(.system(size: 14, weight: .bold))
+                                .font(.satoshi(size: 14, weight: .bold))
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 22)
                                 .padding(.vertical, 8)

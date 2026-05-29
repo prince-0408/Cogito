@@ -34,8 +34,7 @@ struct InsightsView: View {
                         VStack(alignment: .leading, spacing: 15) {
                             HStack {
                                 Text("AI Insights")
-                                    .font(.title3)
-                                    .fontWeight(.bold)
+                                    .font(.satoshi(.title3, weight: .bold))
                                     .foregroundColor(Color("Foreground"))
                                 
                                 Spacer()
@@ -52,11 +51,11 @@ struct InsightsView: View {
                                         Spacer()
                                         VStack(spacing: 8) {
                                             Text("🧠 Cogito AI is actively analyzing...")
-                                                .font(.system(size: 14, weight: .bold, design: .rounded))
+                                                .font(.satoshi(size: 14, weight: .bold))
                                                 .foregroundColor(themeManager.currentTheme.color)
                                             
                                             Text("Scanning completion rates and task priority distribution.")
-                                                .font(.system(size: 11))
+                                                .font(.satoshi(size: 11, weight: .regular))
                                                 .foregroundColor(Color("TextPrimary").opacity(0.6))
                                         }
                                         Spacer()
@@ -73,9 +72,9 @@ struct InsightsView: View {
                                 }) {
                                     HStack {
                                         Image(systemName: "wand.and.stars")
-                                            .font(.headline)
+                                            .font(.satoshi(.headline, weight: .bold))
                                         Text("Generate AI Insights")
-                                            .font(.headline)
+                                            .font(.satoshi(.headline, weight: .bold))
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding()
@@ -113,7 +112,7 @@ struct InsightsView: View {
                                     HStack {
                                         Image(systemName: "arrow.clockwise")
                                         Text("Refresh Insights")
-                                            .font(.subheadline)
+                                            .font(.satoshi(.subheadline, weight: .bold))
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding()
@@ -128,8 +127,7 @@ struct InsightsView: View {
                         // Task Completion by Category
                         VStack(alignment: .leading, spacing: 15) {
                             Text("Task Completion by Category")
-                                .font(.title3)
-                                .fontWeight(.bold)
+                                .font(.satoshi(.title3, weight: .bold))
                                 .foregroundColor(Color("Foreground"))
                             
                             let categoryData = getCategoryData()
@@ -153,7 +151,7 @@ struct InsightsView: View {
                                             .foregroundStyle(by: .value("Category", item.category))
                                             .annotation(position: .overlay) {
                                                 Text("\(item.count)")
-                                                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                                                    .font(.satoshi(size: 11, weight: .bold))
                                                     .foregroundColor(.white)
                                                     .opacity(getAnnotationOpacity(for: item.category))
                                             }
@@ -171,22 +169,22 @@ struct InsightsView: View {
                                         if let selectedCategory = selectedCategoryName,
                                            let selectedItem = categoryData.first(where: { $0.category == selectedCategory }) {
                                             Text("\(selectedItem.count)")
-                                                .font(.system(size: 28, weight: .bold, design: .rounded))
+                                                .font(.satoshi(size: 28, weight: .bold))
                                                 .foregroundColor(getCategoryColor(selectedCategory))
                                                 .transition(.scale.combined(with: .opacity))
                                             
                                             Text(selectedCategory.capitalized)
-                                                .font(.system(size: 10, weight: .bold, design: .rounded))
+                                                .font(.satoshi(size: 10, weight: .bold))
                                                 .foregroundColor(Color("TextPrimary").opacity(0.7))
                                                 .transition(.opacity)
                                         } else {
                                             Text("\(categoryData.reduce(0) { $0 + $1.count })")
-                                                .font(.system(size: 24, weight: .bold, design: .rounded))
+                                                .font(.satoshi(size: 24, weight: .bold))
                                                 .foregroundColor(Color("Foreground"))
                                                 .transition(.opacity)
                                             
                                             Text("Total")
-                                                .font(.system(size: 10, weight: .bold, design: .rounded))
+                                                .font(.satoshi(size: 10, weight: .bold))
                                                 .foregroundColor(Color("TextPrimary").opacity(0.7))
                                                 .transition(.opacity)
                                         }
@@ -218,13 +216,13 @@ struct InsightsView: View {
                                                     .frame(width: 10, height: 10)
                                                 
                                                 Text(item.category.capitalized)
-                                                    .font(.system(size: 13, weight: isHighlighted ? .bold : .medium, design: .rounded))
+                                                    .font(.satoshi(size: 13, weight: isHighlighted ? .bold : .medium))
                                                     .foregroundColor(isHighlighted ? getCategoryColor(item.category) : Color("TextPrimary"))
                                                 
                                                 Spacer()
                                                 
                                                 Text("\(item.count) tasks")
-                                                    .font(.system(size: 13, weight: isHighlighted ? .bold : .medium, design: .rounded))
+                                                    .font(.satoshi(size: 13, weight: isHighlighted ? .bold : .medium))
                                                     .foregroundColor(isHighlighted ? getCategoryColor(item.category) : Color("TextPrimary").opacity(0.6))
                                             }
                                             .padding(.horizontal, 12)
@@ -263,24 +261,23 @@ struct InsightsView: View {
                                 if let date = activeScrubberDate, let value = activeScrubberValue {
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text("Focus Scrubbing")
-                                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                                            .font(.satoshi(size: 11, weight: .bold))
                                             .foregroundColor(themeManager.currentTheme.color)
                                             .textCase(.uppercase)
                                         
                                         Text("\(date.formatted(.dateTime.day().month().year())): \(value) Completed")
-                                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                                            .font(.satoshi(size: 18, weight: .bold))
                                             .foregroundColor(Color("Foreground"))
                                     }
                                     .transition(.opacity.combined(with: .move(edge: .top)))
                                 } else {
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text("Task Completion Trend")
-                                            .font(.title3)
-                                            .fontWeight(.bold)
+                                            .font(.satoshi(.title3, weight: .bold))
                                             .foregroundColor(Color("Foreground"))
                                         
                                         Text("Complete tasks over time to see trends")
-                                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                                            .font(.satoshi(size: 12, weight: .medium))
                                             .foregroundColor(Color("TextPrimary").opacity(0.55))
                                     }
                                     .transition(.opacity)
@@ -413,8 +410,7 @@ struct InsightsView: View {
                         // Task Priority Distribution
                         VStack(alignment: .leading, spacing: 15) {
                             Text("Task Priority Distribution")
-                                .font(.title3)
-                                .fontWeight(.bold)
+                                .font(.satoshi(.title3, weight: .bold))
                                 .foregroundColor(Color("Foreground"))
                             
                             let priorityData = getPriorityData()
@@ -578,7 +574,7 @@ struct InsightCard: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Image(systemName: iconForInsightType(insight.type))
-                    .font(.headline)
+                    .font(.satoshi(.headline, weight: .bold))
                     .foregroundColor(.white)
                     .padding(10)
                     .background(
@@ -587,18 +583,18 @@ struct InsightCard: View {
                     )
                 
                 Text(insight.title)
-                    .font(.headline)
+                    .font(.satoshi(.headline, weight: .bold))
                     .foregroundColor(Color("Foreground"))
                 
                 Spacer()
                 
                 Image(systemName: "chevron.right")
                     .foregroundColor(Color("TextPrimary").opacity(0.5))
-                    .font(.caption)
+                    .font(.satoshi(.caption, weight: .regular))
             }
             
             Text(insight.description)
-                .font(.subheadline)
+                .font(.satoshi(.subheadline, weight: .regular))
                 .foregroundColor(Color("TextPrimary"))
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -674,7 +670,7 @@ struct InsightDetailView: View {
             // Header with icon
             HStack {
                 Image(systemName: iconForInsightType(insight.type))
-                    .font(.title2)
+                    .font(.satoshi(.title2, weight: .bold))
                     .foregroundColor(.white)
                     .padding(16)
                     .background(
@@ -684,12 +680,11 @@ struct InsightDetailView: View {
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(insight.title)
-                        .font(.title3)
-                        .fontWeight(.bold)
+                        .font(.satoshi(.title3, weight: .bold))
                         .foregroundColor(Color("Foreground"))
                     
                     Text(typeLabel(insight.type))
-                        .font(.caption)
+                        .font(.satoshi(.caption, weight: .medium))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(
@@ -708,7 +703,7 @@ struct InsightDetailView: View {
             
             // Description
             Text(insight.description)
-                .font(.body)
+                .font(.satoshi(.body, weight: .regular))
                 .foregroundColor(Color("TextPrimary"))
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.vertical, 10)
@@ -716,7 +711,7 @@ struct InsightDetailView: View {
             // Recommendations section
             VStack(alignment: .leading, spacing: 15) {
                 Text("Recommendations")
-                    .font(.headline)
+                    .font(.satoshi(.headline, weight: .bold))
                     .foregroundColor(Color("Foreground"))
                 
                 // Generate recommendations based on insight type
@@ -726,7 +721,7 @@ struct InsightDetailView: View {
                             .foregroundColor(colorForInsightType(insight.type))
                         
                         Text(recommendation)
-                            .font(.subheadline)
+                            .font(.satoshi(.subheadline, weight: .regular))
                             .foregroundColor(Color("TextPrimary"))
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -854,15 +849,15 @@ struct EmptyDataView: View {
     var body: some View {
         VStack(spacing: 15) {
             Image(systemName: icon)
-                .font(.system(size: 40))
+                .font(.satoshi(size: 40, weight: .bold))
                 .foregroundColor(Color("Primary").opacity(0.7))
             
             Text(title)
-                .font(.headline)
+                .font(.satoshi(.headline, weight: .bold))
                 .foregroundColor(Color("TextPrimary"))
             
             Text(message)
-                .font(.subheadline)
+                .font(.satoshi(.subheadline, weight: .regular))
                 .foregroundColor(Color("TextPrimary").opacity(0.7))
                 .multilineTextAlignment(.center)
         }

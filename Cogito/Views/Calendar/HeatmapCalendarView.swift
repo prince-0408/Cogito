@@ -44,7 +44,7 @@ struct HeatmapCalendarView: View {
                             if !heatmapViewModel.monthData.isEmpty {
                                 let monthDate = heatmapViewModel.monthData[heatmapViewModel.selectedMonthIndex].month
                                 Text(heatmapViewModel.getMonthName(for: monthDate))
-                                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                                    .font(.satoshi(size: 20, weight: .bold))
                                     .foregroundColor(Color("Foreground"))
                             }
                             
@@ -84,7 +84,7 @@ struct HeatmapCalendarView: View {
                                     // Day headers
                                     ForEach(["S", "M", "T", "W", "T", "F", "S"], id: \.self) { day in
                                         Text(day)
-                                            .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                            .font(.satoshi(size: 11, weight: .medium))
                                             .foregroundColor(Color("TextPrimary").opacity(0.5))
                                             .frame(maxWidth: .infinity)
                                     }
@@ -117,7 +117,7 @@ struct HeatmapCalendarView: View {
                                 // Clean Contribution Legend
                                 HStack {
                                     Text("Less")
-                                        .font(.system(size: 11, weight: .medium))
+                                        .font(.satoshi(size: 11, weight: .medium))
                                         .foregroundColor(Color("TextPrimary").opacity(0.5))
                                     
                                     Spacer()
@@ -135,7 +135,7 @@ struct HeatmapCalendarView: View {
                                     Spacer()
                                     
                                     Text("More")
-                                        .font(.system(size: 11, weight: .medium))
+                                        .font(.satoshi(size: 11, weight: .medium))
                                         .foregroundColor(Color("TextPrimary").opacity(0.5))
                                 }
                                 .padding(.horizontal, 4)
@@ -155,12 +155,12 @@ struct HeatmapCalendarView: View {
                                 HStack {
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(day.date.formatted(.dateTime.weekday(.wide)))
-                                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                                            .font(.satoshi(size: 11, weight: .bold))
                                             .foregroundColor(themeManager.currentTheme.color)
                                             .textCase(.uppercase)
                                         
                                         Text(day.date.formatted(.dateTime.day().month().year()))
-                                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                                            .font(.satoshi(size: 18, weight: .bold))
                                             .foregroundColor(Color("Foreground"))
                                     }
                                     
@@ -173,7 +173,7 @@ struct HeatmapCalendarView: View {
                                             .font(.system(size: 14, weight: .semibold))
                                         
                                         Text("\(day.completedCount)/\(day.taskCount) Tasks")
-                                            .font(.system(size: 13, weight: .bold, design: .rounded))
+                                            .font(.satoshi(size: 13, weight: .bold))
                                             .foregroundColor(Color("Foreground"))
                                     }
                                     .padding(.horizontal, 12)
@@ -192,10 +192,10 @@ struct HeatmapCalendarView: View {
                                     }) {
                                         HStack {
                                             Text("View & Manage Tasks")
-                                                .font(.system(size: 14, weight: .bold, design: .rounded))
+                                                .font(.satoshi(size: 14, weight: .bold))
                                             Spacer()
                                             Image(systemName: "arrow.right")
-                                                .font(.system(size: 13, weight: .bold))
+                                                .font(.satoshi(size: 13, weight: .bold))
                                         }
                                         .foregroundColor(.white)
                                         .padding()
@@ -211,7 +211,7 @@ struct HeatmapCalendarView: View {
                                     }
                                 } else {
                                     Text("No tasks scheduled for this day.")
-                                        .font(.system(size: 13, design: .rounded))
+                                        .font(.satoshi(size: 13, weight: .regular))
                                         .foregroundColor(Color("TextPrimary").opacity(0.6))
                                         .padding(.vertical, 4)
                                 }
@@ -229,7 +229,7 @@ struct HeatmapCalendarView: View {
                         // Productivity insights
                         VStack(alignment: .leading, spacing: 14) {
                             Text("Productivity Insights")
-                                .font(.system(size: 18, weight: .bold, design: .rounded))
+                                .font(.satoshi(size: 18, weight: .bold))
                                 .foregroundColor(Color("Foreground"))
                                 .padding(.horizontal, 4)
                             
@@ -238,10 +238,10 @@ struct HeatmapCalendarView: View {
                                 HStack {
                                     Image(systemName: "chart.line.uptrend.xyaxis")
                                         .foregroundColor(themeManager.currentTheme.color)
-                                        .font(.headline)
+                                        .font(.satoshi(.headline, weight: .bold))
                                     
                                     Text("Task Completion Rate")
-                                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                                        .font(.satoshi(size: 14, weight: .bold))
                                         .foregroundColor(Color("Foreground"))
                                 }
                                 
@@ -271,7 +271,7 @@ struct HeatmapCalendarView: View {
                                             .foregroundStyle(Color("TextPrimary").opacity(0.12))
                                         AxisTick()
                                         AxisValueLabel(format: .dateTime.day().month())
-                                            .font(.system(size: 9, weight: .semibold, design: .rounded))
+                                            .font(.satoshi(size: 9, weight: .medium))
                                             .foregroundStyle(Color("TextPrimary").opacity(0.5))
                                     }
                                 }
@@ -282,7 +282,7 @@ struct HeatmapCalendarView: View {
                                         AxisValueLabel {
                                             if let rate = value.as(Double.self) {
                                                 Text("\(Int(rate * 100))%")
-                                                    .font(.system(size: 9, weight: .semibold, design: .rounded))
+                                                    .font(.satoshi(size: 9, weight: .medium))
                                                     .foregroundStyle(Color("TextPrimary").opacity(0.5))
                                             }
                                         }
@@ -389,7 +389,7 @@ struct DayCell: View {
                 
                 VStack(spacing: 2) {
                     Text(String(Calendar.current.component(.day, from: day.date)))
-                        .font(.system(size: 14, weight: isSelected || completionRate >= 0.8 ? .bold : .medium, design: .rounded))
+                        .font(.satoshi(size: 14, weight: isSelected || completionRate >= 0.8 ? .bold : .medium))
                         .foregroundColor(textColor)
                     
                     if hasTasks {
@@ -436,12 +436,12 @@ struct TasksForDateView: View {
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(date.formatted(.dateTime.weekday(.wide)))
-                                .font(.system(size: 11, weight: .bold, design: .rounded))
+                                .font(.satoshi(size: 11, weight: .bold))
                                 .foregroundColor(themeManager.currentTheme.color)
                                 .textCase(.uppercase)
                             
                             Text(date.formatted(.dateTime.day().month().year()))
-                                .font(.system(size: 24, weight: .bold, design: .rounded))
+                                .font(.satoshi(size: 24, weight: .bold))
                                 .foregroundColor(Color("Foreground"))
                         }
                         
@@ -450,11 +450,11 @@ struct TasksForDateView: View {
                         // Task count badge
                         VStack(alignment: .center, spacing: 4) {
                             Text("\(completedCount)/\(tasksForDate.count)")
-                                .font(.system(size: 20, weight: .bold, design: .rounded))
+                                .font(.satoshi(size: 20, weight: .bold))
                                 .foregroundColor(themeManager.currentTheme.color)
                             
                             Text("Completed")
-                                .font(.system(size: 10, weight: .bold))
+                                .font(.satoshi(size: 10, weight: .bold))
                                 .foregroundColor(Color("TextPrimary").opacity(0.7))
                         }
                         .padding(.horizontal, 16)
@@ -476,14 +476,14 @@ struct TasksForDateView: View {
                                 .foregroundColor(themeManager.currentTheme.color.opacity(0.6))
                             
                             Text("No tasks for this day")
-                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .font(.satoshi(size: 16, weight: .bold))
                                 .foregroundColor(Color("TextPrimary"))
                             
                             Button(action: {
                                 presentationMode.wrappedValue.dismiss()
                             }) {
                                 Text("Go Back")
-                                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                                    .font(.satoshi(size: 14, weight: .bold))
                                     .padding(.horizontal, 30)
                                     .padding(.vertical, 14)
                                     .background(themeManager.currentTheme.color)
@@ -524,7 +524,7 @@ struct TasksForDateView: View {
                         presentationMode.wrappedValue.dismiss()
                     }) {
                         Text("Done")
-                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .font(.satoshi(size: 15, weight: .bold))
                             .foregroundColor(themeManager.currentTheme.color)
                     }
                 }

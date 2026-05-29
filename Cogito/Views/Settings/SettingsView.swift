@@ -51,15 +51,15 @@ struct SettingsView: View {
                             }
                             
                             Text("Cogito")
-                                .font(.system(size: 28, weight: .bold, design: .rounded))
+                                .font(.satoshi(size: 28, weight: .bold))
                                 .foregroundColor(Color("Foreground"))
                             
                             Text("AI-Powered Task Manager")
-                                .font(.headline)
+                                .font(.satoshi(.headline, weight: .bold))
                                 .foregroundColor(Color("TextPrimary"))
                             
                             Text("Version 1.0.0")
-                                .font(.caption)
+                                .font(.satoshi(.caption, weight: .regular))
                                 .foregroundColor(Color("TextPrimary").opacity(0.7))
                                 .padding(.top, 5)
                                 .onTapGesture {
@@ -378,8 +378,7 @@ struct SettingsSection<Content: View>: View {
                     )
                 
                 Text(title)
-                    .font(.headline)
-                    .fontWeight(.bold)
+                    .font(.satoshi(.headline, weight: .bold))
                     .foregroundColor(Color("Foreground"))
             }
             .padding(.horizontal)
@@ -438,7 +437,7 @@ struct SettingsRow<TrailingContent: View>: View {
                 .frame(width: 24, height: 24)
             
             Text(title)
-                .font(.subheadline)
+                .font(.satoshi(.subheadline, weight: .medium))
                 .foregroundColor(Color("Foreground"))
             
             Spacer()
@@ -447,7 +446,7 @@ struct SettingsRow<TrailingContent: View>: View {
             
             if hasNavigation {
                 Image(systemName: "chevron.right")
-                    .font(.caption)
+                    .font(.satoshi(.caption, weight: .regular))
                     .foregroundColor(Color("TextPrimary").opacity(0.5))
             }
         }
@@ -469,7 +468,7 @@ struct ToggleSetting: View {
                 .frame(width: 24, height: 24)
             
             Text(title)
-                .font(.subheadline)
+                .font(.satoshi(.subheadline, weight: .medium))
                 .foregroundColor(Color("Foreground"))
             
             Spacer()

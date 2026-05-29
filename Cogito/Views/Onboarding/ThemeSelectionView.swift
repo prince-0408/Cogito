@@ -27,6 +27,7 @@ struct ThemeSelectionView: View {
                 set: { themeManager.setDarkMode($0) }
             )) {
                 Label("Dark Mode", systemImage: themeManager.isDarkMode ? "moon.fill" : "sun.max.fill")
+                    .font(.satoshi(.body, weight: .bold))
                     .foregroundColor(.primary)
             }
             .padding()
@@ -54,7 +55,7 @@ struct ThemeButton: View {
                     .frame(width: 24, height: 24)
                 
                 Text(title)
-                    .font(.headline)
+                    .font(.satoshi(.headline, weight: .bold))
                     .foregroundColor(.primary)
                 
                 Spacer()

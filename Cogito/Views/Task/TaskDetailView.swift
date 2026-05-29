@@ -22,7 +22,7 @@ struct TaskDetailView: View {
                         // Header with category and priority
                         HStack {
                             Label(editedTask.category.rawValue, systemImage: editedTask.category.icon)
-                                .font(.headline)
+                                .font(.satoshi(.headline, weight: .bold))
                                 .foregroundColor(editedTask.category.color)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
@@ -34,7 +34,7 @@ struct TaskDetailView: View {
                             Spacer()
                             
                             Text(editedTask.priority.rawValue)
-                                .font(.headline)
+                                .font(.satoshi(.headline, weight: .bold))
                                 .foregroundColor(editedTask.priority.color)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
@@ -44,11 +44,9 @@ struct TaskDetailView: View {
                                 )
                         }
                         
-                        // Title
                         if isEditing {
                             TextField("Task title", text: $editedTask.title)
-                                .font(.title)
-                                .fontWeight(.bold)
+                                .font(.satoshi(.title, weight: .bold))
                                 .padding()
                                 .background(
                                     RoundedRectangle(cornerRadius: 12)
@@ -56,15 +54,14 @@ struct TaskDetailView: View {
                                 )
                         } else {
                             Text(editedTask.title)
-                                .font(.title)
-                                .fontWeight(.bold)
+                                .font(.satoshi(.title, weight: .bold))
                                 .foregroundColor(Color("Foreground"))
                         }
                         
                         // Description
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Description")
-                                .font(.headline)
+                                .font(.satoshi(.headline, weight: .bold))
                                 .foregroundColor(Color("TextPrimary"))
                             
                             if isEditing {
@@ -90,7 +87,7 @@ struct TaskDetailView: View {
                         // Due Date
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Due Date")
-                                .font(.headline)
+                                .font(.satoshi(.headline, weight: .bold))
                                 .foregroundColor(Color("TextPrimary"))
                             
                             if isEditing {
@@ -121,7 +118,7 @@ struct TaskDetailView: View {
                         // Status
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Status")
-                                .font(.headline)
+                                .font(.satoshi(.headline, weight: .bold))
                                 .foregroundColor(Color("TextPrimary"))
                             
                             HStack {
@@ -135,7 +132,7 @@ struct TaskDetailView: View {
                                     Spacer()
                                     
                                     Text("Completed on \(formattedDate(completedDate))")
-                                        .font(.caption)
+                                        .font(.satoshi(.caption, weight: .regular))
                                         .foregroundColor(Color("TextPrimary").opacity(0.7))
                                 }
                             }

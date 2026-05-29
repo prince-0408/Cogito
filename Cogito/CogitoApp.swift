@@ -18,6 +18,9 @@ struct CogitoApp: App {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
     
     init() {
+        // Register custom fonts dynamically from Assets catalog
+        FontLoader.registerFonts()
+        
         // Setup dependencies
         let (taskVM, aiVM) = setupDependencies()
         

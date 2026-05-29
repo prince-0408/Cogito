@@ -33,11 +33,11 @@ struct NewTaskView: View {
                             // NLP Input
                             VStack(alignment: .leading, spacing: 10) {
                                 Text("Describe your task in natural language")
-                                    .font(.headline)
+                                    .font(.satoshi(.headline, weight: .bold))
                                     .foregroundColor(Color("TextPrimary"))
                                 
                                 Text("Example: \"Schedule team meeting for work tomorrow at 2pm with high priority\"")
-                                    .font(.caption)
+                                    .font(.satoshi(.caption, weight: .regular))
                                     .foregroundColor(Color("TextPrimary").opacity(0.7))
                                 
                                 TextEditor(text: $nlpInput)
@@ -51,7 +51,7 @@ struct NewTaskView: View {
                                 // AI Prompt Suggestions
                                 if !aiSuggestions.isEmpty {
                                     Text("Suggestions")
-                                        .font(.headline)
+                                        .font(.satoshi(.headline, weight: .bold))
                                         .foregroundColor(Color("TextPrimary"))
                                     
                                     ScrollView(.horizontal, showsIndicators: false) {
@@ -61,7 +61,7 @@ struct NewTaskView: View {
                                                     nlpInput = suggestion
                                                 }) {
                                                     Text(suggestion)
-                                                        .font(.caption)
+                                                        .font(.satoshi(.caption, weight: .regular))
                                                         .padding(.horizontal, 12)
                                                         .padding(.vertical, 8)
                                                         .background(
@@ -81,6 +81,7 @@ struct NewTaskView: View {
                                     HStack {
                                         Image(systemName: "text.bubble.fill")
                                         Text("Use AI Prompt")
+                                            .font(.satoshi(.body, weight: .bold))
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding()
@@ -99,6 +100,7 @@ struct NewTaskView: View {
                                         }
                                         
                                         Text("Process with AI")
+                                            .font(.satoshi(.body, weight: .bold))
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding()
@@ -112,6 +114,7 @@ struct NewTaskView: View {
                                     showingNLPInput = false
                                 }) {
                                     Text("Switch to Manual Input")
+                                        .font(.satoshi(.body, weight: .bold))
                                         .frame(maxWidth: .infinity)
                                         .padding()
                                         .background(Color("CardBackground"))
@@ -125,7 +128,7 @@ struct NewTaskView: View {
                                 // Title
                                 VStack(alignment: .leading, spacing: 8) {
                                     Text("Title")
-                                        .font(.headline)
+                                        .font(.satoshi(.headline, weight: .bold))
                                         .foregroundColor(Color("TextPrimary"))
                                     
                                     TextField("Task title", text: $title)
@@ -139,7 +142,7 @@ struct NewTaskView: View {
                                 // Description
                                 VStack(alignment: .leading, spacing: 8) {
                                     Text("Description")
-                                        .font(.headline)
+                                        .font(.satoshi(.headline, weight: .bold))
                                         .foregroundColor(Color("TextPrimary"))
                                     
                                     TextEditor(text: $description)
@@ -154,7 +157,7 @@ struct NewTaskView: View {
                                 // Category
                                 VStack(alignment: .leading, spacing: 8) {
                                     Text("Category")
-                                        .font(.headline)
+                                        .font(.satoshi(.headline, weight: .bold))
                                         .foregroundColor(Color("TextPrimary"))
                                     
                                     ScrollView(.horizontal, showsIndicators: false) {
@@ -174,7 +177,7 @@ struct NewTaskView: View {
                                 // Priority
                                 VStack(alignment: .leading, spacing: 8) {
                                     Text("Priority")
-                                        .font(.headline)
+                                        .font(.satoshi(.headline, weight: .bold))
                                         .foregroundColor(Color("TextPrimary"))
                                     
                                     HStack(spacing: 10) {
@@ -192,7 +195,7 @@ struct NewTaskView: View {
                                 // Due Date
                                 VStack(alignment: .leading, spacing: 8) {
                                     Text("Due Date")
-                                        .font(.headline)
+                                        .font(.satoshi(.headline, weight: .bold))
                                         .foregroundColor(Color("TextPrimary"))
                                     
                                     DatePicker("", selection: $dueDate)
@@ -208,7 +211,7 @@ struct NewTaskView: View {
                                 VStack(alignment: .leading, spacing: 8) {
                                     Toggle(isOn: $enableReminder) {
                                         Text("Set Reminder")
-                                            .font(.headline)
+                                            .font(.satoshi(.headline, weight: .bold))
                                             .foregroundColor(Color("TextPrimary"))
                                     }
                                     .padding(.vertical, 8)
@@ -233,6 +236,7 @@ struct NewTaskView: View {
                                     HStack {
                                         Image(systemName: "wand.and.stars")
                                         Text("Switch to AI Input")
+                                            .font(.satoshi(.body, weight: .bold))
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding()
@@ -252,7 +256,7 @@ struct NewTaskView: View {
                         Spacer()
                         
                         Text(errorMessage)
-                            .font(.subheadline)
+                            .font(.satoshi(.subheadline, weight: .medium))
                             .foregroundColor(.white)
                             .padding()
                             .background(
@@ -365,7 +369,7 @@ struct PromptSheetContent: View {
     var body: some View {
         VStack(spacing: 20) {
             Text("Select a template or write your own prompt")
-                .font(.subheadline)
+                .font(.satoshi(.subheadline, weight: .regular))
                 .foregroundColor(Color("TextPrimary").opacity(0.7))
             
             ScrollView {
@@ -376,7 +380,7 @@ struct PromptSheetContent: View {
                             promptInput = template
                         }) {
                             Text(template)
-                                .font(.subheadline)
+                                .font(.satoshi(.subheadline, weight: .regular))
                                 .padding()
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .background(
@@ -396,7 +400,7 @@ struct PromptSheetContent: View {
             
             VStack(alignment: .leading, spacing: 8) {
                 Text("Your Prompt")
-                    .font(.headline)
+                    .font(.satoshi(.headline, weight: .bold))
                     .foregroundColor(Color("TextPrimary"))
                 
                 TextEditor(text: $promptInput)
@@ -413,7 +417,7 @@ struct PromptSheetContent: View {
                 onSubmit(promptInput)
             }) {
                 Text("Use This Prompt")
-                    .fontWeight(.medium)
+                    .font(.satoshi(.body, weight: .bold))
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color("Primary"))
@@ -437,6 +441,7 @@ struct CategoryButton: View {
             HStack {
                 Image(systemName: category.icon)
                 Text(category.rawValue)
+                    .font(.satoshi(.body, weight: .bold))
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
@@ -457,6 +462,7 @@ struct PriorityButton: View {
     var body: some View {
         Button(action: action) {
             Text(priority.rawValue)
+                .font(.satoshi(.body, weight: .bold))
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
                 .background(

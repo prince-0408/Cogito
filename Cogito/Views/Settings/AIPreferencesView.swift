@@ -32,12 +32,11 @@ struct AIPreferencesView: View {
                             )
                         
                         Text("AI Preferences")
-                            .font(.title2)
-                            .fontWeight(.bold)
+                            .font(.satoshi(.title2, weight: .bold))
                             .foregroundColor(Color("Foreground"))
                         
                         Text("Configure how Mistral AI works with your tasks")
-                            .font(.subheadline)
+                            .font(.satoshi(.subheadline, weight: .regular))
                             .multilineTextAlignment(.center)
                             .foregroundColor(Color("TextPrimary"))
                             .padding(.horizontal)
@@ -53,7 +52,7 @@ struct AIPreferencesView: View {
                     // AI Features
                     VStack(alignment: .leading, spacing: 15) {
                         Text("AI Features")
-                            .font(.headline)
+                            .font(.satoshi(.headline, weight: .bold))
                             .foregroundColor(Color("TextPrimary"))
                         
                         Toggle("Enable AI Suggestions", isOn: Binding(
@@ -72,7 +71,7 @@ struct AIPreferencesView: View {
                                     .foregroundColor(.orange)
                                 
                                 Text("AI features are currently disabled")
-                                    .font(.caption)
+                                    .font(.satoshi(.caption, weight: .bold))
                                     .foregroundColor(Color("TextPrimary"))
                             }
                             .padding(.horizontal)
@@ -83,13 +82,12 @@ struct AIPreferencesView: View {
                     // API Configuration Section
                     VStack(alignment: .leading, spacing: 15) {
                         Text("API Configuration")
-                            .font(.headline)
+                            .font(.satoshi(.headline, weight: .bold))
                             .foregroundColor(Color("TextPrimary"))
                         
                         VStack(alignment: .leading, spacing: 15) {
                             Text("Mistral AI API Key")
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
+                                .font(.satoshi(.subheadline, weight: .bold))
                                 .foregroundColor(Color("Foreground"))
                             
                             HStack {
@@ -121,7 +119,7 @@ struct AIPreferencesView: View {
                             )
                             
                             Text("Leave empty to use the built-in demo key. Get a key at console.mistral.ai.")
-                                .font(.caption)
+                                .font(.satoshi(.caption, weight: .regular))
                                 .foregroundColor(Color("TextPrimary").opacity(0.7))
                         }
                         .padding()
@@ -136,28 +134,27 @@ struct AIPreferencesView: View {
                     // About Mistral AI
                     VStack(alignment: .leading, spacing: 15) {
                         Text("About Mistral AI")
-                            .font(.headline)
+                            .font(.satoshi(.headline, weight: .bold))
                             .foregroundColor(Color("TextPrimary"))
                         
                         VStack(alignment: .leading, spacing: 10) {
                             Text("Mistral AI Integration")
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
+                                .font(.satoshi(.subheadline, weight: .bold))
                                 .foregroundColor(Color("Foreground"))
                             
                             Text("Cogito uses Mistral AI to provide intelligent task suggestions, insights, and natural language processing. Your data is processed securely and is not stored by Mistral AI.")
-                                .font(.caption)
+                                .font(.satoshi(.caption, weight: .regular))
                                 .foregroundColor(Color("TextPrimary").opacity(0.7))
                                 .fixedSize(horizontal: false, vertical: true)
                             
                             Link(destination: URL(string: "https://mistral.ai")!) {
                                 HStack {
                                     Text("Learn more about Mistral AI")
-                                        .font(.caption)
+                                        .font(.satoshi(.caption, weight: .bold))
                                         .foregroundColor(Color("Primary"))
                                     
                                     Image(systemName: "arrow.up.right.square")
-                                        .font(.caption)
+                                        .font(.satoshi(.caption, weight: .bold))
                                         .foregroundColor(Color("Primary"))
                                 }
                             }
@@ -174,7 +171,7 @@ struct AIPreferencesView: View {
                     // AI Features Explanation
                     VStack(alignment: .leading, spacing: 15) {
                         Text("AI Features Explained")
-                            .font(.headline)
+                            .font(.satoshi(.headline, weight: .bold))
                             .foregroundColor(Color("TextPrimary"))
                         
                         FeatureExplanationCard(
@@ -227,11 +224,11 @@ struct FeatureExplanationCard: View {
             
             VStack(alignment: .leading, spacing: 5) {
                 Text(title)
-                    .font(.headline)
+                    .font(.satoshi(.headline, weight: .bold))
                     .foregroundColor(Color("Foreground"))
                 
                 Text(description)
-                    .font(.subheadline)
+                    .font(.satoshi(.subheadline, weight: .regular))
                     .foregroundColor(Color("TextPrimary").opacity(0.7))
                     .fixedSize(horizontal: false, vertical: true)
             }

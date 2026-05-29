@@ -38,8 +38,7 @@ struct CustomSheetView<Content: View>: View {
                     
                     // Title
                     Text(title)
-                        .font(.headline)
-                        .fontWeight(.semibold)
+                        .font(.satoshi(.headline, weight: .bold))
                         .foregroundColor(Color("Foreground"))
                         .padding(.bottom, 16)
                         .padding(.top, 4)
