@@ -332,67 +332,115 @@ struct SuggestionCard: View {
     let onAccept: () -> Void
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Image(systemName: suggestion.category.icon)
-                    .foregroundColor(suggestion.category.color)
-                
-                Text(suggestion.category.rawValue)
-                    .font(.satoshi(.caption, weight: .regular))
-                    .foregroundColor(Color("TextPrimary"))
-                
-                Spacer()
-                
-                Text("\(Int(suggestion.confidence * 100))%")
-                    .font(.satoshi(.caption, weight: .regular))
-                    .foregroundColor(Color("TextPrimary").opacity(0.7))
-            }
-            
-            Text(suggestion.title)
-                .font(.satoshi(.headline, weight: .bold))
-                .foregroundColor(Color("Foreground"))
-                .lineLimit(2)
-            
-            HStack {
-                Text(suggestion.priority.rawValue)
-                    .font(.satoshi(.caption, weight: .medium))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(suggestion.priority.color.opacity(0.2))
-                    .foregroundColor(suggestion.priority.color)
-                    .cornerRadius(4)
-                
-                Spacer()
-                
-                Button(action: {
-                    let impactFeedback = UIImpactFeedbackGenerator(style: .light)
-                    impactFeedback.impactOccurred()
-                    onAccept()
-                }) {
-                    Text("Add")
-                        .font(.satoshi(.caption, weight: .medium))
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color("Primary"))
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-                .accessibilityLabel("Add suggested task")
-                .accessibilityHint("Add \(suggestion.title) to your tasks")
-                .accessibilityAddTraits(.isButton)
-            }
+        VStack(alignment: .leading, spacing: 12) {
+            headerView
+            titleView
+            footerView
         }
-        .padding()
-        .frame(width: 200, height: 150)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color("CardBackground"))
-                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
-        )
+        .padding(14)
+        .frame(width: 220, height: 145)
+        .background(cardBackground)
+        .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("AI suggested task: \(suggestion.title)")
         .accessibilityHint("\(suggestion.category.rawValue) category, \(suggestion.priority.rawValue) priority, \(Int(suggestion.confidence * 100))% confidence")
         .accessibilityAddTraits(.isButton)
+    }
+    
+    // Decoupled subviews to resolve compiler type-checking limits
+    private var headerView: some View {
+        let confidencePercent = Int(suggestion.confidence * 100)
+        let matchText = "\(confidencePercent)% Match"
+        
+        return HStack(spacing: 6) {
+            Image(systemName: suggestion.category.icon)
+                .font(.satoshi(size: 11, weight: .bold))
+                .foregroundColor(suggestion.category.color)
+            
+            Text(suggestion.category.rawValue)
+                .font(.satoshi(size: 11, weight: .bold))
+                .foregroundColor(Color("TextPrimary").opacity(0.8))
+            
+            Spacer()
+            
+            HStack(spacing: 3) {
+                Image(systemName: "sparkles")
+                    .font(.satoshi(size: 9, weight: .bold))
+                    .foregroundColor(Color("Primary"))
+                
+                Text(matchText)
+                    .font(.satoshi(size: 10, weight: .bold))
+                    .foregroundColor(Color("Primary"))
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(Color("Primary").opacity(0.12))
+            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+        }
+    }
+    
+    private var titleView: some View {
+        Text(suggestion.title)
+            .font(.satoshi(size: 15, weight: .bold))
+            .foregroundColor(Color("Foreground"))
+            .lineLimit(2)
+            .frame(height: 42, alignment: .topLeading)
+    }
+    
+    private var footerView: some View {
+        HStack {
+            Text(suggestion.priority.rawValue)
+                .font(.satoshi(size: 10, weight: .bold))
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(suggestion.priority.color.opacity(0.12))
+                .foregroundColor(suggestion.priority.color)
+                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .stroke(suggestion.priority.color.opacity(0.24), lineWidth: 1)
+                )
+            
+            Spacer()
+            
+            Button(action: {
+                let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                impactFeedback.impactOccurred()
+                onAccept()
+            }) {
+                Text("Add Task")
+                    .font(.satoshi(size: 11, weight: .bold))
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 6)
+                    .background(
+                        LinearGradient(
+                            colors: [Color("Primary"), Color("Primary").opacity(0.85)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .foregroundColor(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .shadow(color: Color("Primary").opacity(0.24), radius: 4, x: 0, y: 2)
+            }
+        }
+    }
+    
+    private var cardBackground: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(Color("CardBackground"))
+            
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.15), Color.clear],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1.5
+                )
+        }
     }
 }
 
