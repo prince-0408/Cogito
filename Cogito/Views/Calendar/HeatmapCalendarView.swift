@@ -233,7 +233,7 @@ struct HeatmapCalendarView: View {
                                 .foregroundColor(Color("Foreground"))
                                 .padding(.horizontal, 4)
                             
-                            // Productivity chart
+                             // Productivity chart
                             VStack(alignment: .leading, spacing: 14) {
                                 HStack {
                                     Image(systemName: "chart.line.uptrend.xyaxis")
@@ -250,16 +250,17 @@ struct HeatmapCalendarView: View {
                                         if day.taskCount > 0 {
                                             BarMark(
                                                 x: .value("Date", day.date, unit: .day),
-                                                y: .value("Completion Rate", day.intensity)
+                                                y: .value("Completion Rate", day.intensity),
+                                                width: .fixed(12)
                                             )
                                             .foregroundStyle(
                                                 LinearGradient(
-                                                    colors: [themeManager.currentTheme.color, themeManager.currentTheme.color.opacity(0.4)],
+                                                    colors: [themeManager.currentTheme.color, themeManager.currentTheme.color.opacity(0.45)],
                                                     startPoint: .top,
                                                     endPoint: .bottom
                                                 )
                                             )
-                                            .cornerRadius(4)
+                                            .cornerRadius(6, style: .continuous)
                                         }
                                     }
                                 }
@@ -291,10 +292,22 @@ struct HeatmapCalendarView: View {
                             }
                             .padding()
                             .background(
-                                RoundedRectangle(cornerRadius: 18)
-                                    .fill(Color("CardBackground"))
-                                    .shadow(color: Color.black.opacity(0.03), radius: 10, x: 0, y: 5)
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 18)
+                                        .fill(Color("CardBackground"))
+                                    
+                                    RoundedRectangle(cornerRadius: 18)
+                                        .stroke(
+                                            LinearGradient(
+                                                colors: [Color.white.opacity(0.3), Color.clear],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ),
+                                            lineWidth: 1.5
+                                        )
+                                }
                             )
+                            .shadow(color: Color.black.opacity(0.03), radius: 10, x: 0, y: 5)
                         }
                         .padding(.horizontal)
                     }

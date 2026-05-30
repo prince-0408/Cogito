@@ -139,63 +139,100 @@ struct InsightsView: View {
                                     message: "Complete some tasks to see category statistics"
                                 )
                             } else {
-                                ZStack {
-                                    Chart {
-                                        ForEach(categoryData, id: \.category) { item in
-                                            SectorMark(
-                                                angle: .value("Count", animateCharts ? item.count : 0),
-                                                innerRadius: .ratio(getInnerRadiusRatio(for: item.category)),
-                                                outerRadius: .ratio(getOuterRadiusRatio(for: item.category)),
-                                                angularInset: 1.5
-                                            )
-                                            .foregroundStyle(by: .value("Category", item.category))
-                                            .annotation(position: .overlay) {
-                                                Text("\(item.count)")
-                                                    .font(.satoshi(size: 11, weight: .bold))
-                                                    .foregroundColor(.white)
-                                                    .opacity(getAnnotationOpacity(for: item.category))
+                                let chartDomain: [String] = categoryData.map { $0.category }
+                                let chartRange: [AnyShapeStyle] = categoryData.map { item in
+                                    let categoryName = item.category
+                                    return AnyShapeStyle(
+                                        LinearGradient(
+                                            colors: [getCategoryColor(categoryName), getCategoryColor(categoryName).opacity(0.65)],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                }
+                                
+                                Chart {
+                                    ForEach(categoryData, id: \.category) { item in
+                                        SectorMark(
+                                            angle: .value("Count", animateCharts ? item.count : 0),
+                                            innerRadius: .ratio(getInnerRadiusRatio(for: item.category)),
+                                            outerRadius: .ratio(getOuterRadiusRatio(for: item.category)),
+                                            angularInset: 1.5
+                                        )
+                                        .foregroundStyle(by: .value("Category", item.category))
+                                        .annotation(position: .overlay) {
+                                            Text("\(item.count)")
+                                                .font(.satoshi(size: 11, weight: .bold))
+                                                .foregroundColor(.white)
+                                                .opacity(getAnnotationOpacity(for: item.category))
+                                        }
+                                        .opacity(getSliceOpacity(for: item.category))
+                                    }
+                                }
+                                .chartForegroundStyleScale(
+                                    domain: chartDomain,
+                                    range: chartRange
+                                )
+                                .chartBackground { chartProxy in
+                                    GeometryReader { geo in
+                                        if let plotFrame = chartProxy.plotFrame {
+                                            let frame = geo[plotFrame]
+                                            ZStack {
+                                                Circle()
+                                                    .fill(Color("CardBackground"))
+                                                    .frame(width: 110, height: 110)
+                                                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+                                                    .overlay(
+                                                        Circle()
+                                                            .stroke(
+                                                                LinearGradient(
+                                                                    colors: [Color.white.opacity(0.2), Color.clear],
+                                                                    startPoint: .top,
+                                                                    endPoint: .bottom
+                                                                ),
+                                                                lineWidth: 1
+                                                            )
+                                                    )
+                                                
+                                                VStack {
+                                                    if let selectedCategory = selectedCategoryName,
+                                                       let selectedItem = categoryData.first(where: { $0.category == selectedCategory }) {
+                                                        Text("\(selectedItem.count)")
+                                                            .font(.satoshi(size: 28, weight: .bold))
+                                                            .foregroundColor(getCategoryColor(selectedCategory))
+                                                            .transition(.scale.combined(with: .opacity))
+                                                        
+                                                        Text(selectedCategory.capitalized)
+                                                            .font(.satoshi(size: 10, weight: .bold))
+                                                            .foregroundColor(Color("TextPrimary").opacity(0.7))
+                                                            .transition(.opacity)
+                                                    } else {
+                                                        Text("\(categoryData.reduce(0) { $0 + $1.count })")
+                                                            .font(.satoshi(size: 24, weight: .bold))
+                                                            .foregroundColor(Color("Foreground"))
+                                                            .transition(.opacity)
+                                                        
+                                                        Text("Total")
+                                                            .font(.satoshi(size: 10, weight: .bold))
+                                                            .foregroundColor(Color("TextPrimary").opacity(0.7))
+                                                            .transition(.opacity)
+                                                    }
+                                                }
+                                                .id(selectedCategoryName ?? "total")
+                                                .opacity(animateCharts ? 1 : 0)
                                             }
-                                            .opacity(getSliceOpacity(for: item.category))
+                                            .position(x: frame.midX, y: frame.midY)
                                         }
                                     }
-                                    .chartForegroundStyleScale(domain: categoryData.map { $0.category }, range: categoryData.map { getCategoryColor($0.category) })
-                                    .animation(.spring(response: 0.3, dampingFraction: 0.75), value: selectedCategoryName)
-                                    .accessibilityLabel("Task completion by category donut chart")
-                                    .accessibilityValue(selectedCategoryName != nil ? "Currently highlighting \(selectedCategoryName ?? "") category with \(categoryData.first(where: { $0.category == selectedCategoryName })?.count ?? 0) tasks." : "Total tasks: \(categoryData.reduce(0) { $0 + $1.count }).")
-                                    .accessibilityElement(children: .ignore)
-                                    
-                                    // Center circle with dynamic total count
-                                    VStack {
-                                        if let selectedCategory = selectedCategoryName,
-                                           let selectedItem = categoryData.first(where: { $0.category == selectedCategory }) {
-                                            Text("\(selectedItem.count)")
-                                                .font(.satoshi(size: 28, weight: .bold))
-                                                .foregroundColor(getCategoryColor(selectedCategory))
-                                                .transition(.scale.combined(with: .opacity))
-                                            
-                                            Text(selectedCategory.capitalized)
-                                                .font(.satoshi(size: 10, weight: .bold))
-                                                .foregroundColor(Color("TextPrimary").opacity(0.7))
-                                                .transition(.opacity)
-                                        } else {
-                                            Text("\(categoryData.reduce(0) { $0 + $1.count })")
-                                                .font(.satoshi(size: 24, weight: .bold))
-                                                .foregroundColor(Color("Foreground"))
-                                                .transition(.opacity)
-                                            
-                                            Text("Total")
-                                                .font(.satoshi(size: 10, weight: .bold))
-                                                .foregroundColor(Color("TextPrimary").opacity(0.7))
-                                                .transition(.opacity)
-                                        }
-                                    }
-                                    .id(selectedCategoryName ?? "total")
-                                    .opacity(animateCharts ? 1 : 0)
                                 }
                                 .frame(height: 250)
                                 .padding(.vertical)
+                                .animation(.spring(response: 0.3, dampingFraction: 0.75), value: selectedCategoryName)
+                                .accessibilityLabel("Task completion by category donut chart")
+                                .accessibilityValue(selectedCategoryName != nil ? "Currently highlighting \(selectedCategoryName ?? "") category with \(categoryData.first(where: { $0.category == selectedCategoryName })?.count ?? 0) tasks." : "Total tasks: \(categoryData.reduce(0) { $0 + $1.count }).")
+                                .accessibilityElement(children: .ignore)
                                 
-                                // Legend with interactive rows
+                                // Legend with interactive rows styled as beautiful dashboard elements
                                 VStack(alignment: .leading, spacing: 10) {
                                     ForEach(categoryData, id: \.category) { item in
                                         let isHighlighted = selectedCategoryName == item.category
@@ -212,8 +249,15 @@ struct InsightsView: View {
                                         }) {
                                             HStack {
                                                 Circle()
-                                                    .fill(getCategoryColor(item.category))
+                                                    .fill(
+                                                        LinearGradient(
+                                                            colors: [getCategoryColor(item.category), getCategoryColor(item.category).opacity(0.7)],
+                                                            startPoint: .topLeading,
+                                                            endPoint: .bottomTrailing
+                                                        )
+                                                    )
                                                     .frame(width: 10, height: 10)
+                                                    .shadow(color: getCategoryColor(item.category).opacity(isHighlighted ? 0.6 : 0.2), radius: 3)
                                                 
                                                 Text(item.category.capitalized)
                                                     .font(.satoshi(size: 13, weight: isHighlighted ? .bold : .medium))
@@ -225,11 +269,15 @@ struct InsightsView: View {
                                                     .font(.satoshi(size: 13, weight: isHighlighted ? .bold : .medium))
                                                     .foregroundColor(isHighlighted ? getCategoryColor(item.category) : Color("TextPrimary").opacity(0.6))
                                             }
-                                            .padding(.horizontal, 12)
-                                            .padding(.vertical, 8)
+                                            .padding(.horizontal, 14)
+                                            .padding(.vertical, 10)
                                             .background(
-                                                RoundedRectangle(cornerRadius: 10)
-                                                    .fill(isHighlighted ? getCategoryColor(item.category).opacity(0.12) : Color.clear)
+                                                RoundedRectangle(cornerRadius: 12)
+                                                    .fill(isHighlighted ? getCategoryColor(item.category).opacity(0.12) : Color("CardBackground").opacity(0.4))
+                                                    .overlay(
+                                                        RoundedRectangle(cornerRadius: 12)
+                                                            .stroke(isHighlighted ? getCategoryColor(item.category).opacity(0.3) : Color.clear, lineWidth: 1)
+                                                    )
                                             )
                                         }
                                         .buttonStyle(PlainButtonStyle())
@@ -241,35 +289,63 @@ struct InsightsView: View {
                                 }
                                 .padding()
                                 .background(
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .fill(Color("CardBackground"))
-                                        .shadow(color: Color.black.opacity(0.04), radius: 5, x: 0, y: 2)
+                                    RoundedRectangle(cornerRadius: 18)
+                                        .fill(Color("CardBackground").opacity(0.3))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 18)
+                                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                                        )
                                 )
                             }
                         }
-                        .padding(.horizontal)
+                        .padding()
                         .background(
-                            RoundedRectangle(cornerRadius: 24)
-                                .fill(Color("CardBackground").opacity(0.5))
-                                .padding(.horizontal, 8)
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 24)
+                                    .fill(Color("CardBackground"))
+                                
+                                RoundedRectangle(cornerRadius: 24)
+                                    .stroke(
+                                        LinearGradient(
+                                            colors: [Color.white.opacity(0.3), Color.clear],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ),
+                                        lineWidth: 1.5
+                                    )
+                            }
                         )
-                        .padding(.vertical, 10)
-                        
-                        // Task Completion Trend
+                        .shadow(color: Color.black.opacity(0.04), radius: 12, x: 0, y: 6)
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
+                                              // Task Completion Trend
                         VStack(alignment: .leading, spacing: 15) {
                             HStack {
                                 if let date = activeScrubberDate, let value = activeScrubberValue {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text("Focus Scrubbing")
-                                            .font(.satoshi(size: 11, weight: .bold))
-                                            .foregroundColor(themeManager.currentTheme.color)
-                                            .textCase(.uppercase)
+                                    HStack(spacing: 8) {
+                                        Circle()
+                                            .fill(themeManager.currentTheme.color)
+                                            .frame(width: 8, height: 8)
                                         
-                                        Text("\(date.formatted(.dateTime.day().month().year())): \(value) Completed")
-                                            .font(.satoshi(size: 18, weight: .bold))
-                                            .foregroundColor(Color("Foreground"))
+                                        Text("\(date.formatted(.dateTime.day().month())):")
+                                            .font(.satoshi(size: 14, weight: .medium))
+                                            .foregroundColor(Color("TextPrimary").opacity(0.8))
+                                        
+                                        Text("\(value) Completed")
+                                            .font(.satoshi(size: 14, weight: .bold))
+                                            .foregroundColor(themeManager.currentTheme.color)
                                     }
-                                    .transition(.opacity.combined(with: .move(edge: .top)))
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(
+                                        Capsule()
+                                            .fill(themeManager.currentTheme.color.opacity(0.12))
+                                            .overlay(
+                                                Capsule()
+                                                    .stroke(themeManager.currentTheme.color.opacity(0.24), lineWidth: 1)
+                                            )
+                                    )
+                                    .transition(.scale.combined(with: .opacity))
                                 } else {
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text("Task Completion Trend")
@@ -284,6 +360,7 @@ struct InsightsView: View {
                                 }
                                 Spacer()
                             }
+                            .frame(height: 40)
                             .animation(.spring(response: 0.25, dampingFraction: 0.8), value: activeScrubberDate != nil)
                             
                             let trendData = getTrendData()
@@ -296,72 +373,86 @@ struct InsightsView: View {
                                 )
                             } else {
                                 Chart {
-                                            ForEach(trendData) { item in
-                                                LineMark(
-                                                    x: .value("Date", item.date),
-                                                    y: .value("Completed", getCompletedCount(for: item.completed))
-                                                )
-                                                .foregroundStyle(themeManager.currentTheme.color)
-                                                .interpolationMethod(.catmullRom)
-                                            }
-                                            
-                                            ForEach(trendData) { item in
-                                                AreaMark(
-                                                    x: .value("Date", item.date),
-                                                    y: .value("Completed", getCompletedCount(for: item.completed))
-                                                )
-                                                .foregroundStyle(themeManager.currentTheme.color.opacity(0.18))
-                                                .interpolationMethod(.catmullRom)
-                                            }
-                                            
-                                            ForEach(trendData) { item in
-                                                PointMark(
-                                                    x: .value("Date", item.date),
-                                                    y: .value("Completed", getCompletedCount(for: item.completed))
-                                                )
-                                                .foregroundStyle(themeManager.currentTheme.color)
-                                                .opacity(getPointMarkOpacity())
-                                            }
-                                            
-                                            // Interactive scrubber markings
-                                            if let scrubberDate = activeScrubberDate {
-                                                RuleMark(
-                                                    x: .value("Selected Date", scrubberDate)
-                                                )
-                                                .foregroundStyle(themeManager.currentTheme.color.opacity(0.35))
-                                                .lineStyle(StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [3, 3]))
-                                            }
-                                            
-                                            if let scrubberDate = activeScrubberDate, let scrubberValue = activeScrubberValue {
-                                                // Outer border circle
-                                                PointMark(
-                                                    x: .value("Selected Date", scrubberDate),
-                                                    y: .value("Selected Value", scrubberValue)
-                                                )
-                                                .foregroundStyle(themeManager.currentTheme.color)
-                                                .symbolSize(180)
-                                                
-                                                // Inner white fill circle
-                                                PointMark(
-                                                    x: .value("Selected Date", scrubberDate),
-                                                    y: .value("Selected Value", scrubberValue)
-                                                )
-                                                .foregroundStyle(.white)
-                                                .symbolSize(70)
-                                            }
-                                        }
-                                        .frame(height: 200)
-                                        .chartXAxis {
-                                            AxisMarks(values: .stride(by: .day, count: 2)) { _ in
-                                                AxisGridLine()
-                                                AxisTick()
-                                                AxisValueLabel(format: .dateTime.day().month())
-                                            }
-                                        }
-                                        .accessibilityLabel("Task completion trend line graph")
-                                        .accessibilityValue(activeScrubberDate != nil ? "Selected date \(activeScrubberDate?.formatted(.dateTime.day().month(.wide)) ?? ""), \(activeScrubberValue ?? 0) completed tasks." : "14-day productivity trend. Average completed tasks per day is \(String(format: "%.1f", Double(trendData.reduce(0) { $0 + $1.completed }) / 14.0)).")
-                                        .accessibilityHint("Drag across the graph to scrub and read specific date details.")
-                                        .accessibilityElement(children: .ignore)
+                                    ForEach(trendData) { item in
+                                        LineMark(
+                                            x: .value("Date", item.date),
+                                            y: .value("Completed", getCompletedCount(for: item.completed))
+                                        )
+                                        .foregroundStyle(themeManager.currentTheme.color)
+                                        .lineStyle(StrokeStyle(lineWidth: 3.5, lineCap: .round, lineJoin: .round))
+                                        .interpolationMethod(.catmullRom)
+                                    }
+                                    
+                                    ForEach(trendData) { item in
+                                        AreaMark(
+                                            x: .value("Date", item.date),
+                                            y: .value("Completed", getCompletedCount(for: item.completed))
+                                        )
+                                        .foregroundStyle(
+                                            LinearGradient(
+                                                colors: [
+                                                    themeManager.currentTheme.color.opacity(0.28),
+                                                    themeManager.currentTheme.color.opacity(0.0)
+                                                ],
+                                                startPoint: .top,
+                                                endPoint: .bottom
+                                            )
+                                        )
+                                        .interpolationMethod(.catmullRom)
+                                    }
+                                    
+                                    ForEach(trendData) { item in
+                                        PointMark(
+                                            x: .value("Date", item.date),
+                                            y: .value("Completed", getCompletedCount(for: item.completed))
+                                        )
+                                        .foregroundStyle(themeManager.currentTheme.color)
+                                        .opacity(getPointMarkOpacity())
+                                    }
+                                    
+                                    // Interactive scrubber markings
+                                    if let scrubberDate = activeScrubberDate {
+                                        RuleMark(
+                                            x: .value("Selected Date", scrubberDate)
+                                        )
+                                        .foregroundStyle(themeManager.currentTheme.color.opacity(0.35))
+                                        .lineStyle(StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [4, 4]))
+                                    }
+                                    
+                                    if let scrubberDate = activeScrubberDate, let scrubberValue = activeScrubberValue {
+                                        // Outer border circle
+                                        PointMark(
+                                            x: .value("Selected Date", scrubberDate),
+                                            y: .value("Selected Value", scrubberValue)
+                                        )
+                                        .foregroundStyle(themeManager.currentTheme.color)
+                                        .symbolSize(180)
+                                        
+                                        // Inner white fill circle
+                                        PointMark(
+                                            x: .value("Selected Date", scrubberDate),
+                                            y: .value("Selected Value", scrubberValue)
+                                        )
+                                        .foregroundStyle(.white)
+                                        .symbolSize(70)
+                                    }
+                                }
+                                .frame(height: 200)
+                                .chartXAxis {
+                                    AxisMarks(values: .stride(by: .day, count: 2)) { _ in
+                                        AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, lineCap: .round, dash: [4, 4]))
+                                            .foregroundStyle(Color("TextPrimary").opacity(0.06))
+                                        AxisTick(stroke: StrokeStyle(lineWidth: 1))
+                                            .foregroundStyle(Color("TextPrimary").opacity(0.15))
+                                        AxisValueLabel(format: .dateTime.day().month())
+                                            .font(.satoshi(size: 9, weight: .bold))
+                                            .foregroundStyle(Color("TextPrimary").opacity(0.6))
+                                    }
+                                }
+                                .accessibilityLabel("Task completion trend line graph")
+                                .accessibilityValue(activeScrubberDate != nil ? "Selected date \(activeScrubberDate?.formatted(.dateTime.day().month(.wide)) ?? ""), \(activeScrubberValue ?? 0) completed tasks." : "14-day productivity trend. Average completed tasks per day is \(String(format: "%.1f", Double(trendData.reduce(0) { $0 + $1.completed }) / 14.0)).")
+                                .accessibilityHint("Drag across the graph to scrub and read specific date details.")
+                                .accessibilityElement(children: .ignore)
                                 .chartOverlay { proxy in
                                     GeometryReader { geometry in
                                         Rectangle()
@@ -399,13 +490,26 @@ struct InsightsView: View {
                                 .padding(.vertical)
                             }
                         }
-                        .padding(.horizontal)
+                        .padding()
                         .background(
-                            RoundedRectangle(cornerRadius: 24)
-                                .fill(Color("CardBackground").opacity(0.5))
-                                .padding(.horizontal, 8)
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 24)
+                                    .fill(Color("CardBackground"))
+                                
+                                RoundedRectangle(cornerRadius: 24)
+                                    .stroke(
+                                        LinearGradient(
+                                            colors: [Color.white.opacity(0.3), Color.clear],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ),
+                                        lineWidth: 1.5
+                                    )
+                            }
                         )
-                        .padding(.vertical, 10)
+                        .shadow(color: Color.black.opacity(0.04), radius: 12, x: 0, y: 6)
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
                         
                         // Task Priority Distribution
                         VStack(alignment: .leading, spacing: 15) {
@@ -426,26 +530,68 @@ struct InsightsView: View {
                                     ForEach(priorityData, id: \.priority) { item in
                                         BarMark(
                                             x: .value("Priority", item.priority),
-                                            y: .value("Count", animateCharts ? item.count : 0)
+                                            y: .value("Count", animateCharts ? item.count : 0),
+                                            width: .fixed(45)
                                         )
-                                        .foregroundStyle(getPriorityColor(item.priority))
-                                        .cornerRadius(8)
+                                        .foregroundStyle(
+                                            LinearGradient(
+                                                colors: [
+                                                    getPriorityColor(item.priority),
+                                                    getPriorityColor(item.priority).opacity(0.65)
+                                                ],
+                                                startPoint: .top,
+                                                endPoint: .bottom
+                                            )
+                                        )
+                                        .cornerRadius(12, style: .continuous)
+                                        .annotation(position: .top, spacing: 6) {
+                                            Text("\(item.count)")
+                                                .font(.satoshi(size: 12, weight: .bold))
+                                                .foregroundColor(getPriorityColor(item.priority))
+                                                .opacity(animateCharts ? 1.0 : 0.0)
+                                        }
                                     }
                                 }
                                 .frame(height: 200)
                                 .chartYAxis {
-                                    AxisMarks(position: .leading)
+                                    AxisMarks(position: .leading) { value in
+                                        AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, lineCap: .round, dash: [4, 4]))
+                                            .foregroundStyle(Color("TextPrimary").opacity(0.06))
+                                        AxisValueLabel()
+                                            .font(.satoshi(size: 10, weight: .medium))
+                                            .foregroundStyle(Color("TextPrimary").opacity(0.5))
+                                    }
+                                }
+                                .chartXAxis {
+                                    AxisMarks { _ in
+                                        AxisValueLabel()
+                                            .font(.satoshi(size: 11, weight: .bold))
+                                            .foregroundStyle(Color("TextPrimary"))
+                                    }
                                 }
                                 .padding(.vertical)
                             }
                         }
-                        .padding(.horizontal)
+                        .padding()
                         .background(
-                            RoundedRectangle(cornerRadius: 24)
-                                .fill(Color("CardBackground").opacity(0.5))
-                                .padding(.horizontal, 8)
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 24)
+                                    .fill(Color("CardBackground"))
+                                
+                                RoundedRectangle(cornerRadius: 24)
+                                    .stroke(
+                                        LinearGradient(
+                                            colors: [Color.white.opacity(0.3), Color.clear],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ),
+                                        lineWidth: 1.5
+                                    )
+                            }
                         )
-                        .padding(.vertical, 10)
+                        .shadow(color: Color.black.opacity(0.04), radius: 12, x: 0, y: 6)
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
                     }
                     .padding(.vertical)
                 }

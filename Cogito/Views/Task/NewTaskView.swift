@@ -283,13 +283,11 @@ struct NewTaskView: View {
                     .disabled(title.isEmpty)
                 }
             }
-            .sheet(isPresented: $showingPromptSheet) {
-                CustomSheetView(isPresented: $showingPromptSheet, title: "AI Prompt Templates") {
-                    PromptSheetContent(promptInput: $promptInput, onSubmit: { prompt in
-                        nlpInput = prompt
-                        showingPromptSheet = false
-                    })
-                }
+            .modernSheet(isPresented: $showingPromptSheet, title: "AI Prompt Templates") {
+                PromptSheetContent(promptInput: $promptInput, onSubmit: { prompt in
+                    nlpInput = prompt
+                    showingPromptSheet = false
+                })
             }
             .onAppear {
                 // Request notification permissions if needed

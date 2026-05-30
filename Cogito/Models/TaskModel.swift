@@ -59,7 +59,7 @@ enum TaskCategory: String, CaseIterable, Codable {
         case .education:
             return Color.orange
         case .other:
-            return Color.gray
+            return Color(red: 0.6, green: 0.64, blue: 0.7)
         }
     }
 }
